@@ -1,0 +1,1213 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clinical-scribe.local/contracts.json",
+  "$defs": {
+    "element": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string",
+          "minLength": 1
+        },
+        "span": {
+          "type": "object",
+          "properties": {
+            "ref": {
+              "type": "string",
+              "pattern": "^\\[\\d{2,}:\\d{2}\\]$"
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "ref",
+            "text"
+          ],
+          "additionalProperties": false
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "certainty": {
+          "enum": [
+            "confirmed",
+            "probable",
+            "differential"
+          ]
+        },
+        "attribution": {
+          "enum": [
+            "patient",
+            "doctor",
+            "nurse",
+            "companion"
+          ]
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "value",
+        "span",
+        "confidence"
+      ],
+      "additionalProperties": true
+    },
+    "note": {
+      "type": "object",
+      "properties": {
+        "chief_complaint": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/element"
+              }
+            }
+          ]
+        },
+        "history_of_presenting_illness": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/element"
+              }
+            }
+          ]
+        },
+        "review_of_systems": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/element"
+              }
+            }
+          ]
+        },
+        "past_medical_history": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/element"
+              }
+            }
+          ]
+        },
+        "past_surgical_history": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/element"
+              }
+            }
+          ]
+        },
+        "medication_history": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/element"
+              }
+            }
+          ]
+        },
+        "allergies": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/element"
+              }
+            }
+          ]
+        },
+        "family_history": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/element"
+              }
+            }
+          ]
+        },
+        "social_history": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/element"
+              }
+            }
+          ]
+        },
+        "vitals": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/element"
+              }
+            }
+          ]
+        },
+        "examination": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/element"
+              }
+            }
+          ]
+        },
+        "assessment": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "allOf": [
+                  {
+                    "$ref": "#/$defs/element"
+                  },
+                  {
+                    "required": [
+                      "certainty"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "plan": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/element"
+              }
+            }
+          ]
+        }
+      },
+      "required": [
+        "chief_complaint",
+        "history_of_presenting_illness",
+        "review_of_systems",
+        "past_medical_history",
+        "past_surgical_history",
+        "medication_history",
+        "allergies",
+        "family_history",
+        "social_history",
+        "vitals",
+        "examination",
+        "assessment",
+        "plan"
+      ],
+      "additionalProperties": false
+    },
+    "resolved_element": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/element"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "code_system": {
+              "type": "string"
+            },
+            "confidence": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "alternatives": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "score": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                },
+                "required": [
+                  "code",
+                  "name",
+                  "score"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "status": {
+              "enum": [
+                "resolved",
+                "unresolved",
+                "ambiguous"
+              ]
+            }
+          },
+          "required": [
+            "code",
+            "code_system",
+            "confidence",
+            "alternatives",
+            "status"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "unresolved",
+                  "ambiguous"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "code": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "code": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "resolved": {
+      "type": "object",
+      "properties": {
+        "chief_complaint": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/resolved_element"
+              }
+            }
+          ]
+        },
+        "history_of_presenting_illness": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/resolved_element"
+              }
+            }
+          ]
+        },
+        "review_of_systems": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/resolved_element"
+              }
+            }
+          ]
+        },
+        "past_medical_history": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/resolved_element"
+              }
+            }
+          ]
+        },
+        "past_surgical_history": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/resolved_element"
+              }
+            }
+          ]
+        },
+        "medication_history": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/resolved_element"
+              }
+            }
+          ]
+        },
+        "allergies": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/resolved_element"
+              }
+            }
+          ]
+        },
+        "family_history": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/resolved_element"
+              }
+            }
+          ]
+        },
+        "social_history": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/resolved_element"
+              }
+            }
+          ]
+        },
+        "vitals": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/resolved_element"
+              }
+            }
+          ]
+        },
+        "examination": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/resolved_element"
+              }
+            }
+          ]
+        },
+        "assessment": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "allOf": [
+                  {
+                    "$ref": "#/$defs/resolved_element"
+                  },
+                  {
+                    "required": [
+                      "certainty"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "plan": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/resolved_element"
+              }
+            }
+          ]
+        }
+      },
+      "required": [
+        "chief_complaint",
+        "history_of_presenting_illness",
+        "review_of_systems",
+        "past_medical_history",
+        "past_surgical_history",
+        "medication_history",
+        "allergies",
+        "family_history",
+        "social_history",
+        "vitals",
+        "examination",
+        "assessment",
+        "plan"
+      ],
+      "additionalProperties": false
+    },
+    "knowledge": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "drug_class_rule",
+                  "red_flag",
+                  "test_constraint"
+                ]
+              },
+              "fields": {
+                "type": "object",
+                "minProperties": 1
+              },
+              "source": {
+                "type": "string",
+                "minLength": 1
+              },
+              "section": {
+                "type": "string",
+                "minLength": 1
+              },
+              "page": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "quote": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "type",
+              "fields",
+              "source",
+              "section",
+              "page",
+              "quote"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "not_in_corpus": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "prose": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "rows",
+        "not_in_corpus",
+        "prose"
+      ],
+      "additionalProperties": false
+    },
+    "extract_request": {
+      "type": "object",
+      "properties": {
+        "transcript": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "transcript"
+      ],
+      "additionalProperties": false
+    },
+    "extract_response": {
+      "type": "object",
+      "properties": {
+        "chief_complaint": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/element"
+              }
+            }
+          ]
+        },
+        "history_of_presenting_illness": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/element"
+              }
+            }
+          ]
+        },
+        "review_of_systems": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/element"
+              }
+            }
+          ]
+        },
+        "past_medical_history": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/element"
+              }
+            }
+          ]
+        },
+        "past_surgical_history": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/element"
+              }
+            }
+          ]
+        },
+        "medication_history": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/element"
+              }
+            }
+          ]
+        },
+        "allergies": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/element"
+              }
+            }
+          ]
+        },
+        "family_history": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/element"
+              }
+            }
+          ]
+        },
+        "social_history": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/element"
+              }
+            }
+          ]
+        },
+        "vitals": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/element"
+              }
+            }
+          ]
+        },
+        "examination": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/element"
+              }
+            }
+          ]
+        },
+        "assessment": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "allOf": [
+                  {
+                    "$ref": "#/$defs/element"
+                  },
+                  {
+                    "required": [
+                      "certainty"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "plan": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/element"
+              }
+            }
+          ]
+        }
+      },
+      "required": [
+        "chief_complaint",
+        "history_of_presenting_illness",
+        "review_of_systems",
+        "past_medical_history",
+        "past_surgical_history",
+        "medication_history",
+        "allergies",
+        "family_history",
+        "social_history",
+        "vitals",
+        "examination",
+        "assessment",
+        "plan"
+      ],
+      "additionalProperties": false
+    },
+    "validate_request": {
+      "type": "object",
+      "properties": {
+        "transcript": {
+          "type": "string",
+          "minLength": 1
+        },
+        "note": {
+          "$ref": "#/$defs/note"
+        }
+      },
+      "required": [
+        "transcript",
+        "note"
+      ],
+      "additionalProperties": false
+    },
+    "validate_response": {
+      "type": "object",
+      "properties": {
+        "valid": {
+          "const": true
+        }
+      },
+      "required": [
+        "valid"
+      ],
+      "additionalProperties": false
+    },
+    "resolve_request": {
+      "type": "object",
+      "properties": {
+        "note": {
+          "$ref": "#/$defs/note"
+        },
+        "register": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "note",
+        "register"
+      ],
+      "additionalProperties": false
+    },
+    "resolve_response": {
+      "type": "object",
+      "properties": {
+        "chief_complaint": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/resolved_element"
+              }
+            }
+          ]
+        },
+        "history_of_presenting_illness": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/resolved_element"
+              }
+            }
+          ]
+        },
+        "review_of_systems": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/resolved_element"
+              }
+            }
+          ]
+        },
+        "past_medical_history": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/resolved_element"
+              }
+            }
+          ]
+        },
+        "past_surgical_history": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/resolved_element"
+              }
+            }
+          ]
+        },
+        "medication_history": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/resolved_element"
+              }
+            }
+          ]
+        },
+        "allergies": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/resolved_element"
+              }
+            }
+          ]
+        },
+        "family_history": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/resolved_element"
+              }
+            }
+          ]
+        },
+        "social_history": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/resolved_element"
+              }
+            }
+          ]
+        },
+        "vitals": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/resolved_element"
+              }
+            }
+          ]
+        },
+        "examination": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/resolved_element"
+              }
+            }
+          ]
+        },
+        "assessment": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "allOf": [
+                  {
+                    "$ref": "#/$defs/resolved_element"
+                  },
+                  {
+                    "required": [
+                      "certainty"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "plan": {
+          "oneOf": [
+            {
+              "const": "NOT_STATED"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/resolved_element"
+              }
+            }
+          ]
+        }
+      },
+      "required": [
+        "chief_complaint",
+        "history_of_presenting_illness",
+        "review_of_systems",
+        "past_medical_history",
+        "past_surgical_history",
+        "medication_history",
+        "allergies",
+        "family_history",
+        "social_history",
+        "vitals",
+        "examination",
+        "assessment",
+        "plan"
+      ],
+      "additionalProperties": false
+    },
+    "knowledge_request": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "note": {
+          "$ref": "#/$defs/note"
+        }
+      },
+      "required": [
+        "source"
+      ],
+      "additionalProperties": false
+    },
+    "knowledge_response": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "drug_class_rule",
+                  "red_flag",
+                  "test_constraint"
+                ]
+              },
+              "fields": {
+                "type": "object",
+                "minProperties": 1
+              },
+              "source": {
+                "type": "string",
+                "minLength": 1
+              },
+              "section": {
+                "type": "string",
+                "minLength": 1
+              },
+              "page": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "quote": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "type",
+              "fields",
+              "source",
+              "section",
+              "page",
+              "quote"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "not_in_corpus": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "prose": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "rows",
+        "not_in_corpus",
+        "prose"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
