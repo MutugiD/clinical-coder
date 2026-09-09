@@ -10,6 +10,11 @@ The supplied work-sample brief and its Appendix A are authoritative. All five pa
 are required. Transcription is excluded. The target budget is 12 to 16 hours;
 implementation status and actual elapsed effort belong in the final README.
 
+The supplied `instructions-data/` directory stays local and untracked. Evaluators
+provide input paths; Docker runs mount input files rather than bake them into the
+image. Tests commit independently authored synthetic fixtures only. Required
+derived submission outputs are separate from the supplied input directory.
+
 | Requirement | Acceptance evidence |
 | --- | --- |
 | Root executable and exact CLI | Subprocess tests, Linux clean-clone run |
