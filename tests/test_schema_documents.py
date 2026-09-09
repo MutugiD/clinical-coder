@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 import pytest
-from jsonschema import Draft202012Validator
+from jsonschema import Draft202012Validator, ValidationError
 from referencing import Registry, Resource
 
 
@@ -16,5 +16,5 @@ def test_schemas_are_valid_and_missing_sections_fail():
     note = dict.fromkeys(root["$defs"]["note"]["required"], "NOT_STATED")
     validator.validate(note)
     del note["assessment"]
-    with pytest.raises(Exception, match="assessment"):
+    with pytest.raises(ValidationError, match="assessment"):
         validator.validate(note)
