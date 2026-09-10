@@ -11,4 +11,5 @@ dist/
 .env
 instructions-data/
 .work/
+results/
 docs/feature-contexts.md

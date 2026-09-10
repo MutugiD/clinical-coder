@@ -5,12 +5,12 @@ import json
 import httpx
 
 from clinical_scribe.config import Settings
-from clinical_scribe.errors import StageError
+from clinical_scribe.errors import ProviderError, StageError
 
 
 def generate(settings: Settings, prompt: str, payload: dict, schema: dict) -> tuple[str, dict]:
     if settings.offline:
-        raise StageError("extract", "provider invocation is forbidden in offline mode")
+        raise ProviderError("extract", "provider invocation is forbidden in offline mode")
     try:
         if settings.provider == "ollama":
             response = httpx.post(
@@ -36,7 +36,7 @@ def generate(settings: Settings, prompt: str, payload: dict, schema: dict) -> tu
         else:
             key = settings.gemini_api_key.get_secret_value()
             if not key:
-                raise StageError("extract", "GEMINI_API_KEY is missing")
+                raise ProviderError("extract", "GEMINI_API_KEY is missing")
             response = httpx.post(
                 "https://generativelanguage.googleapis.com/v1beta/models/"
                 + settings.gemini_model
@@ -63,7 +63,7 @@ def generate(settings: Settings, prompt: str, payload: dict, schema: dict) -> tu
         data = response.json()
         if settings.provider == "ollama":
             if data.get("done_reason") == "length" or not data.get("done"):
-                raise StageError("extract", "Ollama response was truncated or incomplete")
+                raise ProviderError("extract", "Ollama response was truncated or incomplete")
             content = data["message"]["content"]
             metadata = {
                 "model": "ollama/" + settings.model,
@@ -75,21 +75,23 @@ def generate(settings: Settings, prompt: str, payload: dict, schema: dict) -> tu
         else:
             candidate = data["candidates"][0]
             if candidate.get("finishReason") != "STOP":
-                raise StageError("extract", "Gemini response was blocked or incomplete")
+                raise ProviderError("extract", "Gemini response was blocked or incomplete")
             content = "".join(p.get("text", "") for p in candidate["content"]["parts"])
             metadata = {"model": "gemini/" + data.get("modelVersion", settings.gemini_model)}
         if not isinstance(content, str) or not content.strip():
-            raise StageError("extract", "provider returned empty content")
+            raise ProviderError("extract", "provider returned empty content")
         return content, metadata
     except httpx.HTTPStatusError as exc:
-        raise StageError("extract", f"{settings.provider} HTTP {exc.response.status_code}") from exc
+        raise ProviderError(
+            "extract", f"{settings.provider} HTTP {exc.response.status_code}"
+        ) from exc
     except httpx.TimeoutException as exc:
-        raise StageError(
+        raise ProviderError(
             "extract", f"{settings.provider} timed out after {settings.timeout:g}s"
         ) from exc
     except httpx.HTTPError as exc:
-        raise StageError("extract", f"{settings.provider} connection failed") from exc
+        raise ProviderError("extract", f"{settings.provider} connection failed") from exc
     except (AttributeError, KeyError, IndexError, TypeError, ValueError) as exc:
         if isinstance(exc, StageError):
             raise
-        raise StageError("extract", f"{settings.provider} returned an invalid response") from exc
+        raise ProviderError("extract", f"{settings.provider} returned an invalid response") from exc

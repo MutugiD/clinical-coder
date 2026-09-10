@@ -44,3 +44,17 @@ field tampering, omitted/duplicate rules, source-only invariance, dose and age
 guidance gaps, unsupported formats and network isolation. The parser intentionally
 fails on unsupported sentence structures; these results do not establish coverage
 of arbitrary clinical guidelines or multi-section documents.
+
+## Pipeline and service verification
+
+On 2026-09-10 the full supplied-transcript pipeline completed through local
+CPU-only Ollama in 60.469 seconds. Extraction, validation, resolution and knowledge
+all logged `ok`. The committed note, resolved output and knowledge artifact match
+that run's canonical output hashes; `outputs/run_log.jsonl` contains its actual
+records. Offline replay also completed all four stages successfully.
+
+All four real Compose services passed health and processing requests, followed by
+invalid-input rejection checks. Stopping extraction left the other three healthy.
+The Compose processing check uses an independent transcript and guideline in offline
+mode. This demonstrates HTTP boundaries without claiming hosted-model verification.
+Direct Gemini remains covered by controlled failure tests, not a live generation.

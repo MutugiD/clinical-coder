@@ -7,6 +7,7 @@ produces cited rules for clinical review.
 
 [Requirements](docs/prd.md) · [Architecture](docs/architecture.md) ·
 [Design decisions](docs/decisions.md) · [Testing](docs/testing-strategy.md) ·
+[End-to-end guide](docs/end-to-end-testing.md) ·
 [Issues](https://github.com/MutugiD/clinical-coder/issues)
 
 ## Setup
@@ -103,6 +104,28 @@ parser, not a general guideline-document reader. It uses no model or network and
 does not infer drug-class membership or replace clinical decisions.
 
 ## Verification
+
+Run the complete pipeline from the repository root:
+
+```sh
+./scribe pipeline --offline --transcript consultation.txt --register register.csv --source guideline.txt --out results/run-1
+```
+
+Use `--provider ollama` or `--provider gemini` instead of `--offline` for live
+extraction. The pipeline runs extract → validate → resolve → knowledge and writes
+three JSON artifacts plus `run_log.jsonl`. A failure exits nonzero and logs later
+stages as skipped. Reusing a directory preserves prior successful files on failure;
+check the latest run's records or use a fresh directory for each test.
+
+Four independent HTTP services are available through `docker compose up -d
+--build --wait`. For a credential-free service test, set `SCRIBE_OFFLINE=true`
+first, then run `python src/tests/compose_smoke.py`. Their localhost ports are
+8001–8004 for extract, validate, resolve and knowledge. Each provides `/health`
+and `/process`; health reports liveness rather than model readiness.
+
+See the [end-to-end guide](docs/end-to-end-testing.md) for Windows commands,
+request bodies, failure checks and model configuration. The
+[acceptance checks](docs/acceptance-checks.md) map the brief and review cases to tests.
 
 ```sh
 ruff check .

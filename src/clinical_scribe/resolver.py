@@ -6,7 +6,7 @@ from copy import deepcopy
 from difflib import SequenceMatcher
 
 from clinical_scribe.contracts import enforce
-from clinical_scribe.evidence import FAMILY, REJECTED
+from clinical_scribe.evidence import FAMILY, NEGATION, REJECTED
 from clinical_scribe.loaders import RegisterEntry, parse_register
 from clinical_scribe.validation import reject_codes
 
@@ -22,7 +22,7 @@ KINDS = {
     "plan": {"drug", "lab", "procedure"},
 }
 SYSTEMS = {"diagnosis": "ICD-10", "drug": "ATC", "lab": "EC", "procedure": "EC", "allergen": "EC"}
-NEGATED = re.compile(r"\b(no|not|never|denies|denied|without|sina|hakuna|hamna)\b", re.I)
+NEGATED = re.compile(NEGATION.pattern + r"|\bwithout\b", re.I)
 CONDITIONAL = re.compile(r"\b(if|unless|endapo|ikiwa)\b", re.I)
 
 
