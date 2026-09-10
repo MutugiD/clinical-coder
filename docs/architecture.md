@@ -12,9 +12,8 @@ invokes stage functions, and writes validated artifacts. HTTP wrappers receive
 content in JSON rather than arbitrary server-side paths. Both forms use identical
 stage contracts.
 
-The extraction, validation, resolver and knowledge functions implement the CLI
-stage boundaries. The HTTP and pipeline sections specify their integration design;
-delivery coverage is tracked in GitHub Issues.
+CLI, in-process pipeline and HTTP processing use the same enforced stage
+boundaries. Delivery coverage is tracked in GitHub Issues.
 
 ```mermaid
 flowchart LR
@@ -199,8 +198,8 @@ for transcript validation. The pipeline supplies its already validated note.
 
 ## Service interfaces and deployment
 
-The design uses extract, validate, resolve, and knowledge processes from one image.
-Each exposes GET /health returning {name,version} and POST /process.
+Compose runs extract, validate, resolve, and knowledge processes from one image.
+Each exposes GET /health returning {service,name,version} and POST /process.
 
 | Service | Request | Successful response |
 | --- | --- | --- |
@@ -219,6 +218,20 @@ Compose starts each service independently. Only extraction needs provider settin
 The CLI pipeline invokes the same stage functions in-process, avoiding unnecessary
 HTTP dependencies for command-line execution.
 
+`boundaries.process` enforces request and response schemas for all transports.
+An invalid implementation response raises `BoundaryOutputError` and cannot return
+HTTP 200. HTTP parsing also rejects duplicate JSON keys, non-finite values and
+non-UTF-8 bodies. Sync stage functions run in the HTTP worker thread pool. Provider
+errors have an explicit type and become HTTP 503; unexpected errors return a bounded
+500 response. Successful processing returns the stage response itself, not an
+additional transport envelope.
+
+Only the extraction container receives provider variables. `SCRIBE_OFFLINE=true`
+selects replay/rules for that service; CLI mode remains controlled by its arguments.
+Each service can start without the others. Health checks do not contact providers;
+model readiness remains an explicit dependency check. CI starts the actual Compose
+stack offline and sends health, processing and invalid-input requests.
+
 ## Failure, artifacts, and audit
 
 Usage errors exit 2; processing/validation errors exit 1. Diagnostics use stderr.
@@ -226,15 +239,36 @@ Strict JSON rejects duplicate keys and non-finite values. CSV errors identify th
 register and row where possible. Unexpected exceptions remain visible.
 
 Write through temporary files and atomic replacement after success. A failed write
-preserves an existing target. Pipeline orchestration must prevent prior artifacts
-from being mistaken for the current run, retain completed stages on later failure,
-and explicitly skip dependent stages.
+preserves an existing target. Extracted notes are held in memory until the separate
+validation stage succeeds. Later failures retain completed outputs, log the failed
+stage, mark every subsequent stage skipped, and return nonzero. Old downstream
+files are not erased; file existence is never evidence that the latest run passed.
+Use fresh output directories or verify the latest run ID and hashes before consuming
+artifacts. Concurrent runs must use different output directories. Inputs may not
+alias output artifact paths.
 
 Each audit record includes run_id, stage, timezone-aware timestamp, status,
-input_hash, output_hash, model, prompt_hash, and message. Hash canonical JSON or
-source content consistently; absent output uses the hash of empty bytes. Record
-replay/rules honestly without a model call, retaining original generation metadata
-in the manifest. Do not put transcript text or keys into routine diagnostics.
+input_hash, output_hash, model, prompt_hash, and message. Each run appends four
+terminal records in order, flushing and syncing each line. Hashes are SHA-256 over
+UTF-8 canonical JSON: sorted keys, compact separators, literal Unicode and no
+non-finite numbers. Input hashes cover the exact request object, including every
+input for multi-input stages. Output hashes cover successful response objects;
+the validation response is `{valid:true}`, and the extraction response matches
+the eventual note artifact. Hashes can be reproduced by decoding JSON artifacts
+and applying `pipeline.digest`, independently of their display formatting.
+
+Failed stages have null output hashes. Skipped stages have null input and output
+hashes. If loading fails before a request can be formed, hash the explicitly tagged
+descriptor `{unavailable_input: path}`. Audit path/collision failures occurring
+before execution cannot claim a stage ran. An unwritable log aborts immediately;
+there is no silent audit fallback. These conventions avoid pretending an absent
+output is a successful artifact.
+
+Model extraction records the attempted model and exact prompt hash, replaced by
+actual provider metadata on success. Offline extraction records replay/rules with
+null model/prompt fields; original generation identity remains in the replay
+manifest. Keys and transcript bodies are excluded from routine stage logs. The
+source payload hashes still permit controlled reproduction when inputs are available.
 
 ## Scaling and operational evolution
 

@@ -1,0 +1,41 @@
+x-service: &service
+  build: .
+  image: clinical-scribe:local
+  entrypoint: ["python", "-m", "uvicorn", "clinical_scribe.services:create_app", "--factory", "--host", "0.0.0.0", "--port", "8000"]
+  healthcheck:
+    test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"]
+    interval: 5s
+    timeout: 4s
+    retries: 12
+    start_period: 10s
+
+services:
+  extract:
+    <<: *service
+    ports: ["127.0.0.1:8001:8000"]
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    environment:
+      SCRIBE_SERVICE: extract
+      SCRIBE_OFFLINE: ${SCRIBE_OFFLINE:-false}
+      SCRIBE_PROVIDER: ${SCRIBE_PROVIDER:-ollama}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3:1.7b}
+      OLLAMA_TIMEOUT_SECONDS: ${OLLAMA_TIMEOUT_SECONDS:-180}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.1-flash-lite}
+      GEMINI_TIMEOUT_SECONDS: ${GEMINI_TIMEOUT_SECONDS:-180}
+  validate:
+    <<: *service
+    ports: ["127.0.0.1:8002:8000"]
+    environment:
+      SCRIBE_SERVICE: validate
+  resolve:
+    <<: *service
+    ports: ["127.0.0.1:8003:8000"]
+    environment:
+      SCRIBE_SERVICE: resolve
+  knowledge:
+    <<: *service
+    ports: ["127.0.0.1:8004:8000"]
+    environment:
+      SCRIBE_SERVICE: knowledge

@@ -22,7 +22,13 @@ jobs:
       - run: ./scribe --version
   container:
     runs-on: ubuntu-latest
+    env:
+      SCRIBE_OFFLINE: 'true'
     steps:
       - uses: actions/checkout@v4
-      - run: docker build -t clinical-scribe .
-      - run: docker run --rm clinical-scribe --version
+      - run: docker compose build
+      - run: docker run --rm clinical-scribe:local --version
+      - run: docker compose up -d --wait --wait-timeout 90
+      - run: python src/tests/compose_smoke.py
+      - if: always()
+        run: docker compose down

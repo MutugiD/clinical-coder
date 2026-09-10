@@ -22,17 +22,21 @@ def claims(item: Evidence) -> list[tuple[str, bool, tuple[str, ...]]]:
         return []
     if set(item.sections) & {"family_history", "past_medical_history", "past_surgical_history"}:
         return []
-    text = item.text.casefold()
+    text = item.text.casefold().replace("\u2019", "'")
     time = re.search(r"\b(yesterday|last year|previously|today|now|zamani)\b", text)
     period = time[0] if time else "current"
-    numbers = tuple(t for t in normalize(text) if re.fullmatch(r"-?\d+(?:\.\d+)?", t))
+    numbers = tuple(t for t in normalize(text) if re.fullmatch(r"-?(?:\d+(?:\.\d+)?|\.\d+)", t))
     negative = bool(NEGATIVE.search(text))
     result = []
     for concept, pattern in SYMPTOM_ROOTS.items():
         if re.search(r"\b(?:" + pattern + r")\b", text):
             result.append((concept + ":" + period, negative, numbers))
     if "medication_history" in item.sections:
-        name = re.match(r"(?:i (?:take|use|am taking)\s+)?([a-z][a-z-]+)", text)
+        name = re.match(
+            r"(?:i (?:(?:do not|don't|never) )?(?:take|use|am (?:not )?taking)\s+)?"
+            r"([a-z][a-z-]+)",
+            text,
+        )
         if name and name[1] not in {"one", "two", "no", "none", "sometimes", "na"}:
             result.append(("medication:" + name[1] + ":" + period, negative, numbers))
     return result

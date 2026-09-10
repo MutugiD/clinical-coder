@@ -13,7 +13,12 @@ REJECTED = re.compile(
     r"not pursue|no longer considering|discard(?:ed)?)\b",
     re.I,
 )
-NEGATIVE = re.compile(r"\b(no|not|den(?:y|ies|ied)|normal|sawa|sina|hakuna|hamna)\b", re.I)
+NEGATION = re.compile(
+    r"\b(no|not|never|den(?:y|ies|ied)|sina|hakuna|hamna|"
+    r"(?:don|doesn|didn|isn|aren|wasn|weren|hasn|haven|hadn|can|couldn|wouldn|shouldn)['’]t)\b",
+    re.I,
+)
+NEGATIVE = re.compile(NEGATION.pattern + r"|\b(normal|sawa)\b", re.I)
 VITAL = re.compile(
     r"\b(bp|blood pressure|pulse|temperature|heart rate|respiratory rate|spo2|oxygen saturation)\b",
     re.I,

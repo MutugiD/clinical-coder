@@ -77,6 +77,4 @@ def normalize(text: str) -> tuple[str, ...]:
     ):
         text = re.sub(pattern, replacement, text)
     # Decimal points, signs, and numerical order are retained, unlike bag-of-digit checks.
-    return tuple(
-        re.findall(r"-?(?:\d+(?:\.\d+)?|\.\d+)|[^\W\d_]+(?:'[^\W\d_]+)?|[/+%<>=]", text)
-    )
+    return tuple(re.findall(r"-?(?:\d+(?:\.\d+)?|\.\d+)|[^\W\d_]+(?:'[^\W\d_]+)?|[/+%<>=]", text))
