@@ -37,6 +37,20 @@ separately. Keep `outputs/` as the committed reference artifacts; write experime
 under `results/`. The commands below use an activated environment's `python`; you
 can replace `python` with `& $python` in PowerShell.
 
+## Linux/WSL environment setup
+
+Use Python 3.12. On images where the system Python is managed by uv, create the
+environment and install from the lock file with:
+
+```sh
+uv venv --python 3.12 .venv
+uv pip install --python .venv/bin/python -r requirements.lock
+uv pip install --python .venv/bin/python --no-deps --no-build-isolation -e .
+```
+
+If `python3.12 -m venv .venv` is supported by the image, it is equivalent. Do
+not use a Python 3.10 environment: `pyproject.toml` requires Python 3.12.
+
 ## Local environment
 
 The local `.env` contains SCRIBE_PROVIDER, GEMINI_MODEL, GEMINI_API_KEY,
@@ -65,7 +79,8 @@ python scribe pipeline --offline --transcript instructions-data/transcript_01.tx
 if ($LASTEXITCODE -ne 0) { throw 'Pipeline failed; inspect stderr and run_log.jsonl.' }
 ```
 
-On Linux, replace `python scribe` with `./scribe`. A successful run exits zero and
+On Linux, use Python 3.12 explicitly (`python3.12` or the interpreter provided by
+the evaluation image), then replace `python scribe` with `./scribe`. A successful run exits zero and
 writes `note.json`, `resolved.json`, `knowledge.json` and `run_log.jsonl`.
 Successful CLI commands leave stdout empty. Inspect all four log records for the
 latest `run_id`; each must say `ok`. Validate a note independently with:
