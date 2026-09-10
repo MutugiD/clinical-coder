@@ -45,12 +45,6 @@ provider, including structured requests, missing credentials, HTTP failures,
 timeouts, blocked/truncated responses, completeness and credential-safe errors.
 Removed provider selection is rejected, while offline ignores live configuration.
 
-`local_rehearsal.py` is an opt-in CLI runner, separate from pytest. It checks the
-supplied, alternate and submission consultations against manually specified facts,
-expected codes, conflicts, provenance markers and canonical output hashes. Its
-live mode imports an explicitly named local environment file; credentials are
-never written to rehearsal reports. Provider validity is separate from completeness.
-
 See [evaluation](evaluation.md) for actual model measurements and
 [end-to-end testing](end-to-end-testing.md) for manual commands. Final clean-clone
 submission rehearsal and remaining writing are tracked in issue #9.

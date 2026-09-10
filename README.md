@@ -138,11 +138,6 @@ Tests and independent fixtures live in `src/tests`. Provider mocks are distinct
 from live model measurements. Use read-only input and writable output volumes for
 Docker extraction. Only the extraction service receives Gemini credentials.
 
-For extensive local testing with an ignored `.env`, run
-`python src/tests/local_rehearsal.py --live --env-file .env`. Omit both flags for
-offline rehearsal. It checks three consultations, standalone commands, clinical
-expectations, audit hashes and tamper rejection, recording results in timestamped
-directories. See the end-to-end guide for individual CLI environment loading.
 
 ## Architecture
 

@@ -37,26 +37,12 @@ separately. Keep `outputs/` as the committed reference artifacts; write experime
 under `results/`. The commands below use an activated environment's `python`; you
 can replace `python` with `& $python` in PowerShell.
 
-## Local environment and extensive rehearsal
+## Local environment
 
 The local `.env` contains SCRIBE_PROVIDER, GEMINI_MODEL, GEMINI_API_KEY,
 GEMINI_TIMEOUT_SECONDS, SCRIBE_OFFLINE and SCRIBE_SERVICE. Git ignores it and the
 Docker build excludes it. `.env.example` documents the names with a blank key.
 Compose reads `.env` automatically; the CLI reads exported environment variables.
-
-The rehearsal runner explicitly imports the local file without printing credentials:
-
-```powershell
-python src/tests/local_rehearsal.py --live --env-file .env
-python src/tests/local_rehearsal.py
-```
-
-The first command makes paid/quota-consuming Gemini requests. The second is offline
-and requires no key. Each creates a timestamped directory under
-`results/local-rehearsal/`, runs three consultations, checks independent clinical
-expectations and output hashes, exercises standalone CLI commands, and rejects
-numeric, code and family-history mutations. `rehearsal.json` records commands,
-timings, exits and bounded errors. An assertion failure means the rehearsal failed.
 
 For individual CLI commands, import the simple KEY=value file into PowerShell:
 
@@ -68,8 +54,6 @@ Get-Content .env | ForEach-Object {
 }
 python scribe check
 ```
-
-Do not print the environment or resolved Compose configuration when collecting logs.
 
 ## Start with offline replay
 
