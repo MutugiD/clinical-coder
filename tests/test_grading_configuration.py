@@ -160,8 +160,9 @@ def test_gemini_failure_never_falls_back_or_echoes_key(monkeypatch, status):
     with pytest.raises(StageError, match=f"HTTP {status}") as error:
         check(Settings(provider="gemini", gemini_api_key="example-test-key"))
     assert "example-test-key" not in str(error.value)
-    assert len(calls) == 1
-    assert "googleapis.com" in calls[0]
+    assert calls == [
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite"
+    ]
 
 
 @pytest.mark.parametrize(
