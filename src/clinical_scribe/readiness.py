@@ -1,13 +1,16 @@
 """Check selected dependencies and report unfinished execution paths explicitly."""
 
+import hashlib
 import shutil
 from pathlib import Path
 
 import httpx
 
 from clinical_scribe.config import Settings
-from clinical_scribe.contracts import schema_registry
+from clinical_scribe.contracts import enforce, schema_registry
 from clinical_scribe.errors import StageError
+from clinical_scribe.loaders import read_json
+from clinical_scribe.output import canonical_bytes
 
 
 def check_ollama(settings: Settings) -> None:
@@ -65,18 +68,22 @@ def check_gemini(settings: Settings) -> None:
 def check(settings: Settings | None = None) -> None:
     settings = settings or Settings.from_env()
     schema_registry()
+    if not Path("prompts/extract.txt").is_file():
+        raise StageError("check", "extraction prompt is missing", "prompts/extract.txt")
     if settings.offline:
         if not Path("outputs/replay-manifest.json").is_file():
             raise StageError(
                 "check",
-                "offline replay artifacts missing: outputs/replay-manifest.json; "
-                "offline extraction is not implemented in this milestone",
+                "offline replay artifacts missing: outputs/replay-manifest.json",
             )
-        raise StageError("check", "offline extraction is not implemented in this milestone")
+        manifest = read_json("outputs/replay-manifest.json", "check")
+        enforce("replay_manifest", manifest, "check")
+        note = read_json("outputs/note.json", "check")
+        enforce("note", note, "check")
+        if "sha256:" + hashlib.sha256(canonical_bytes(note)).hexdigest() != manifest["note_hash"]:
+            raise StageError("check", "offline note hash mismatch")
+        return
     if settings.provider == "gemini":
         check_gemini(settings)
     else:
         check_ollama(settings)
-    raise StageError(
-        "check", "provider dependencies found, but extraction is not implemented in this milestone"
-    )

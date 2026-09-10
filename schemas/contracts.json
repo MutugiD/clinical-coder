@@ -1244,6 +1244,45 @@
         "prose"
       ],
       "additionalProperties": false
+    },
+    "replay_manifest": {
+      "type": "object",
+      "properties": {
+        "transcript_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "note_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "mode": {
+          "enum": [
+            "rules",
+            "model"
+          ]
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "prompt_hash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "transcript_hash",
+        "note_hash",
+        "mode",
+        "model",
+        "prompt_hash"
+      ],
+      "additionalProperties": false
     }
   }
 }

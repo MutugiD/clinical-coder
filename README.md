@@ -1,94 +1,109 @@
 # Clinical coder
 
-Grounded clinical note extraction, deterministic coding, and cited guideline rules.
+Clinical coder produces source-backed clinical notes from speaker-labelled English
+and Swahili consultations. It preserves verbatim evidence and validates notes before
+writing them. Separate contracts define deterministic coding and cited guideline
+knowledge for an auditable clinical workflow.
 
-This repository implements the supplied clinical engineering work sample in
-Python 3.12. The authoritative interface is Appendix A of the supplied brief.
+[Requirements](docs/prd.md) · [Architecture](docs/architecture.md) ·
+[Design decisions](docs/decisions.md) · [Testing](docs/testing-strategy.md) ·
+[Issues](https://github.com/MutugiD/clinical-coder/issues)
 
-## Development setup
+## Setup
+
+Use Python 3.12 and an installed, running Ollama server. From the repository checkout:
 
 ```sh
 python3.12 -m venv .venv
 . .venv/bin/activate
-pip install -r requirements.lock
-pip install --no-deps --no-build-isolation -e .
-./scribe --version
+python -m pip install -r requirements.lock
+python -m pip install --no-deps --no-build-isolation -e .
+ollama pull qwen3:1.7b
 ```
 
-On Windows activate `.venv/Scripts/Activate.ps1` and run `python scribe`.
+Then run `./scribe check`. If Ollama is stopped, start it with `ollama serve`.
+On Windows, activate `.venv/Scripts/Activate.ps1` and use `python scribe`.
 
-## Checks
+## Extract and validate
+
+```sh
+./scribe extract --transcript consultation.txt --out results/note.json
+./scribe validate --transcript consultation.txt --note results/note.json
+```
+
+The note contains the 13 contract sections. Each element includes its value,
+timestamped evidence, and confidence; assessment also carries certainty.
+A section with no evidence contains `NOT_STATED`.
+
+The default provider is local Ollama with `qwen3:1.7b`, CPU inference, and thinking
+disabled. Provider selection is explicit; failures never silently switch providers.
+
+```sh
+./scribe check --provider gemini
+./scribe extract --provider gemini --transcript consultation.txt --out results/note.json
+./scribe extract --offline --transcript consultation.txt --out results/note.json
+```
+
+Gemini requires `GEMINI_API_KEY`. Offline execution uses verified committed output
+for a matching transcript or conservative rules for a new input. Unsupported input
+fails with an explanation. Every returned note is validated.
+
+| Variable | Default |
+| --- | --- |
+| `SCRIBE_PROVIDER` | `ollama` |
+| `OLLAMA_BASE_URL` | `http://localhost:11434` |
+| `OLLAMA_MODEL` | `qwen3:1.7b` |
+| `OLLAMA_TIMEOUT_SECONDS` | `180` |
+| `GEMINI_MODEL` | `gemini-3.1-flash-lite` |
+| `GEMINI_API_KEY` | Required for Gemini |
+| `GEMINI_TIMEOUT_SECONDS` | `180` |
+
+`.env.example` documents settings. Export them in the shell; the application does
+not load `.env` automatically. `--offline` cannot be combined with `--provider`.
+
+## Verification
 
 ```sh
 ruff check .
 pytest -q
-python -m compileall -q src tests
+python -m compileall -q src
 docker build -t clinical-scribe .
 docker run --rm clinical-scribe --version
 ```
 
-## Design and implementation status
+Tests and independent fixtures live in `src/tests`. Provider mocks are distinct
+from live model measurements. Use read-only input and writable output volumes for
+Docker extraction. Docker Desktop reaches host Ollama through
+`OLLAMA_BASE_URL=http://host.docker.internal:11434`.
 
-The scaffold, CI, CLI argument contract, strict input parsing, configuration, and
-readiness diagnostics are implemented. Clinical stages are not implemented yet.
-`check` deliberately returns nonzero even when dependencies are present, explaining
-that extraction is unfinished. This milestone is not ready for clinical grading.
-See [requirements](docs/prd.md),
-[architecture](docs/architecture.md), [decisions](docs/decisions.md), and
-[testing strategy](docs/testing-strategy.md). Schemas define the intended public
-interfaces before clinical implementation.
+## Architecture
 
-Final delivery will include the exact CLI commands, four Compose services,
-validated sample outputs, actual time and cuts, and the required leadership answer.
+Extraction selects evidence; deterministic rendering constructs the note; validation
+checks source fidelity and clinical scope. Resolution and guideline extraction use
+separate contracts so their rules can evolve independently of the model. At higher
+load, queue bounded model requests and scale deterministic stages separately.
+Monitor latency, validation failures, unresolved rates, and provider availability
+without patient text in metric labels. Version resolver rules and catalogue hashes
+so a release does not silently recode historical notes. See the architecture document
+for component responsibilities, data flows, and service contracts.
 
-## Extraction configuration
+## Failure behavior
 
-Select `--provider ollama` or `--provider gemini` for `check`, `extract`, and
-`pipeline`. If the flag is absent, `SCRIBE_PROVIDER` supplies the selection and
-defaults to `ollama`. `--offline` is mutually exclusive with an explicit provider
-and ignores provider environment settings. No failure silently switches providers.
+Exit `0` means success; `1` means processing or validation failure; `2` means invalid
+arguments. Diagnostics go to stderr. Output is written only after a stage succeeds.
+Unsupported language, scope, or transformations cause rejection rather than guessed
+facts. Implementation coverage and defects are tracked in GitHub Issues.
 
-| Setting | Default or purpose |
-| --- | --- |
-| `OLLAMA_BASE_URL` | `http://localhost:11434` |
-| `OLLAMA_MODEL` | `qwen3:1.7b` |
-| `OLLAMA_TIMEOUT_SECONDS` | `180` |
-| `GEMINI_API_KEY` | Required for Gemini; no default |
-| `GEMINI_MODEL` | `gemini-3.1-flash-lite` |
-| `GEMINI_TIMEOUT_SECONDS` | `180` |
+## Where this would break
 
-The supplied `.env.example` documents settings; it is not loaded automatically.
-Local Ollama readiness distinguishes a missing executable, unavailable server, and
-missing model. For a remote endpoint, only the server and model are checked.
-Gemini readiness checks key presence and model metadata access; it does not prove
-generation quota or extraction accuracy. Both then report the unfinished stage.
-
-After installing Ollama, start it with `ollama serve` if it is not already running,
-then pull the local model with `ollama pull qwen3:1.7b`. No cloud model or GPU is
-required for the planned local path. CPU latency and extraction accuracy have not
-yet been measured. The final grading setup will include this pull within five
-commands; the current development instructions are not that final setup.
-
-Offline replay and unseen-input rules are scheduled for PR 4. `check --offline`
-currently reports missing replay artifacts or an unimplemented path, not readiness.
-No sample outputs are being presented as live extraction results.
-
-## Clarified clinical behavior
-
-Conflicting statements retain separate spans and shared conflict metadata and stay
-uncoded. Probable and differential diagnoses may resolve while retaining certainty;
-considered-and-rejected statements never receive codes. Optional contextual spans
-aid traceability but cannot justify values or numbers absent from the primary span.
-Mixed-language values are acceptable. Knowledge rows and corpus gaps come only from
-the guideline; optional note input influences prose only.
-
-## Remaining milestones
-
-PR 4 implements extraction, offline handling, and strict validation. PR 5 implements
-deterministic resolution, including uncertainty and conflicts. PR 6 implements
-guideline extraction. PR 7 implements services and audit logging. PR 8 verifies
-CPU-only setup and completes outputs, limitations, and the leadership answer.
-
-Input files are supplied separately. `instructions-data/` stays local and is excluded
-from Git and Docker images. All CLI paths may be absolute or relative to the
-repository root; invoke the CLI and service processes from that root.
+- **Unrecognised Sheng or indirect answers:** scope rules may not classify a relevant
+  utterance. Offline extraction reports unsupported turns; broader bilingual
+  evaluation is required before deployment.
+- **Incorrect speaker labels:** a relative's account could be attributed to the
+  patient. Validate attribution against the source; incorrectly labelled source
+  audio still requires upstream review.
+- **Ambiguous corrections and chronology:** a clinician may need to determine which
+  statement is current. Preserve detected conflicts; the rules are not a general
+  semantic contradiction solver.
+- **Small-model omissions or slow inference:** a grounded note may be incomplete or
+  time out. Evaluate coverage separately from validity and record CPU latency.

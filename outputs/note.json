@@ -1,0 +1,273 @@
+{
+  "chief_complaint": [
+    {
+      "value": "Nimekuwa na tumbo kuuma for about three weeks, hapa juu, kama kuwaka.",
+      "span": {
+        "ref": "[00:04]",
+        "text": "Nimekuwa na tumbo kuuma for about three weeks, hapa juu, kama kuwaka."
+      },
+      "confidence": 1.0,
+      "attribution": "patient",
+      "context_span": {
+        "ref": "[00:00]",
+        "text": "Habari, karibu. What brings you in today?"
+      }
+    }
+  ],
+  "history_of_presenting_illness": [
+    {
+      "value": "Usiku sana.",
+      "span": {
+        "ref": "[00:15]",
+        "text": "Usiku sana."
+      },
+      "confidence": 1.0,
+      "attribution": "patient",
+      "context_span": {
+        "ref": "[00:11]",
+        "text": "Burning pain in the upper abdomen. Is it worse after eating or at night?"
+      }
+    },
+    {
+      "value": "And after tea in the morning.",
+      "span": {
+        "ref": "[00:15]",
+        "text": "And after tea in the morning."
+      },
+      "confidence": 1.0,
+      "attribution": "patient",
+      "context_span": {
+        "ref": "[00:11]",
+        "text": "Burning pain in the upper abdomen. Is it worse after eating or at night?"
+      }
+    }
+  ],
+  "review_of_systems": [
+    {
+      "value": "No vomiting.",
+      "span": {
+        "ref": "[00:22]",
+        "text": "No vomiting."
+      },
+      "confidence": 1.0,
+      "attribution": "patient",
+      "context_span": {
+        "ref": "[00:19]",
+        "text": "Any vomiting, black stool, weight loss?"
+      }
+    },
+    {
+      "value": "Stool is normal.",
+      "span": {
+        "ref": "[00:22]",
+        "text": "Stool is normal."
+      },
+      "confidence": 1.0,
+      "attribution": "patient",
+      "context_span": {
+        "ref": "[00:19]",
+        "text": "Any vomiting, black stool, weight loss?"
+      }
+    },
+    {
+      "value": "Weight ni sawa.",
+      "span": {
+        "ref": "[00:22]",
+        "text": "Weight ni sawa."
+      },
+      "confidence": 1.0,
+      "attribution": "patient",
+      "context_span": {
+        "ref": "[00:19]",
+        "text": "Any vomiting, black stool, weight loss?"
+      }
+    }
+  ],
+  "past_medical_history": "NOT_STATED",
+  "past_surgical_history": [
+    {
+      "value": "Appendix, 2019, at the county hospital.",
+      "span": {
+        "ref": "[00:46]",
+        "text": "Appendix, 2019, at the county hospital."
+      },
+      "confidence": 1.0,
+      "attribution": "patient",
+      "context_span": {
+        "ref": "[00:44]",
+        "text": "Any surgeries before?"
+      }
+    }
+  ],
+  "medication_history": [
+    {
+      "value": "Diclofenac for my knee, one tablet mara mbili kwa siku, for about a month now.",
+      "span": {
+        "ref": "[00:29]",
+        "text": "Diclofenac for my knee, one tablet mara mbili kwa siku, for about a month now."
+      },
+      "confidence": 1.0,
+      "attribution": "patient",
+      "context_span": {
+        "ref": "[00:27]",
+        "text": "Are you taking any medicines?"
+      }
+    },
+    {
+      "value": "Na Panadol sometimes.",
+      "span": {
+        "ref": "[00:29]",
+        "text": "Na Panadol sometimes."
+      },
+      "confidence": 1.0,
+      "attribution": "patient",
+      "context_span": {
+        "ref": "[00:27]",
+        "text": "Are you taking any medicines?"
+      }
+    }
+  ],
+  "allergies": [
+    {
+      "value": "Penicillin.",
+      "span": {
+        "ref": "[00:40]",
+        "text": "Penicillin."
+      },
+      "confidence": 1.0,
+      "attribution": "patient",
+      "context_span": {
+        "ref": "[00:38]",
+        "text": "Any known allergies?"
+      }
+    },
+    {
+      "value": "Nilipata rash last year.",
+      "span": {
+        "ref": "[00:40]",
+        "text": "Nilipata rash last year."
+      },
+      "confidence": 1.0,
+      "attribution": "patient",
+      "context_span": {
+        "ref": "[00:38]",
+        "text": "Any known allergies?"
+      }
+    }
+  ],
+  "family_history": [
+    {
+      "value": "My father alikuwa na ulcers.",
+      "span": {
+        "ref": "[00:53]",
+        "text": "My father alikuwa na ulcers."
+      },
+      "confidence": 1.0,
+      "attribution": "patient",
+      "context_span": {
+        "ref": "[00:50]",
+        "text": "Anyone in the family with stomach problems or ulcers?"
+      }
+    }
+  ],
+  "social_history": [
+    {
+      "value": "I do not smoke.",
+      "span": {
+        "ref": "[00:59]",
+        "text": "I do not smoke."
+      },
+      "confidence": 1.0,
+      "attribution": "patient",
+      "context_span": {
+        "ref": "[00:57]",
+        "text": "Do you smoke or drink?"
+      }
+    },
+    {
+      "value": "Pombe kidogo, weekends.",
+      "span": {
+        "ref": "[00:59]",
+        "text": "Pombe kidogo, weekends."
+      },
+      "confidence": 1.0,
+      "attribution": "patient",
+      "context_span": {
+        "ref": "[00:57]",
+        "text": "Do you smoke or drink?"
+      }
+    }
+  ],
+  "vitals": [
+    {
+      "value": "BP is 128 over 82, pulse 76, temperature 36.8.",
+      "span": {
+        "ref": "[01:03]",
+        "text": "BP is 128 over 82, pulse 76, temperature 36.8."
+      },
+      "confidence": 1.0,
+      "attribution": "doctor"
+    }
+  ],
+  "examination": [
+    {
+      "value": "Abdomen is soft, mild epigastric tenderness, no guarding.",
+      "span": {
+        "ref": "[01:03]",
+        "text": "Abdomen is soft, mild epigastric tenderness, no guarding."
+      },
+      "confidence": 1.0,
+      "attribution": "doctor"
+    }
+  ],
+  "assessment": [
+    {
+      "value": "I think this is most likely gastritis related to the diclofenac.",
+      "span": {
+        "ref": "[01:14]",
+        "text": "I think this is most likely gastritis related to the diclofenac."
+      },
+      "confidence": 1.0,
+      "attribution": "doctor",
+      "certainty": "probable"
+    }
+  ],
+  "plan": [
+    {
+      "value": "We will stop the diclofenac",
+      "span": {
+        "ref": "[01:14]",
+        "text": "We will stop the diclofenac"
+      },
+      "confidence": 1.0,
+      "attribution": "doctor"
+    },
+    {
+      "value": "start omeprazole 20 milligrams once daily for four weeks",
+      "span": {
+        "ref": "[01:14]",
+        "text": "start omeprazole 20 milligrams once daily for four weeks"
+      },
+      "confidence": 1.0,
+      "attribution": "doctor"
+    },
+    {
+      "value": "check an H. pylori stool antigen.",
+      "span": {
+        "ref": "[01:14]",
+        "text": "check an H. pylori stool antigen."
+      },
+      "confidence": 1.0,
+      "attribution": "doctor"
+    },
+    {
+      "value": "Come back in two weeks, sooner if you vomit blood or the pain becomes severe.",
+      "span": {
+        "ref": "[01:14]",
+        "text": "Come back in two weeks, sooner if you vomit blood or the pain becomes severe."
+      },
+      "confidence": 1.0,
+      "attribution": "doctor"
+    }
+  ]
+}

@@ -37,6 +37,8 @@ block all network access, rename the known transcript, mutate its contents, tamp
 with cached notes, and exercise unseen supported and unsupported cases. Run CPU-only
 benchmarks with hardware, cold/warm latency, and validation outcomes recorded.
 
-The CLI milestone tests configuration and metadata shapes only. Clinical conflict,
-certainty, contextual evidence, replay, and provider generation tests belong to the
-subsequent implementation milestones, not the current passing test count.
+Tests live under src/tests; fixtures are under src/tests/fixtures. Extraction tests
+exercise provider failures, schema-limited selections, content-based replay,
+cache tampering and unsupported unseen input. Numeric and attribution tests use
+independent mutations with positive controls. Live CPU results are separate from
+credential-free CI and are recorded in [evaluation.md](evaluation.md).

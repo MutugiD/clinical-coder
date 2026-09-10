@@ -1,0 +1,15 @@
+[00:00] DOCTOR: What brings you in today?
+[00:03] PATIENT: Nina kikohozi for five days.
+[00:08] COMPANION: I think she has pneumonia and she fainted yesterday.
+[00:13] DOCTOR: Any vomiting or fever?
+[00:17] PATIENT: No vomiting. Homa hakuna.
+[00:22] DOCTOR: Are you taking any medicines?
+[00:25] PATIENT: Paracetamol 500 milligrams once daily for two days.
+[00:31] DOCTOR: Any known allergies?
+[00:35] PATIENT: No known allergies.
+[00:40] DOCTOR: Anyone in your family with lung disease?
+[00:44] PATIENT: My mother had asthma.
+[00:49] NURSE: Temperature is 37.2, pulse 84.
+[00:55] DOCTOR: I was wondering whether pneumonia, but no; let's not go there yet.
+[01:02] DOCTOR: This is most likely a viral respiratory infection. Continue fluids. Come back in three days if symptoms persist.
+[01:15] PATIENT: Asante daktari.

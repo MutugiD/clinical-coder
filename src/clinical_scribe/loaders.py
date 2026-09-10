@@ -82,11 +82,15 @@ def parse_register(text: str, source: str = "register") -> list[RegisterEntry]:
                     source,
                 )
             codes[item["code"]] = item["kind"]
-            rows.append(RegisterEntry(
-                kind=item["kind"], code=item["code"], name=item["name"],
-                synonyms=tuple(s.strip() for s in item["synonyms"].split(";") if s.strip()),
-                row=reader.line_num,
-            ))
+            rows.append(
+                RegisterEntry(
+                    kind=item["kind"],
+                    code=item["code"],
+                    name=item["name"],
+                    synonyms=tuple(s.strip() for s in item["synonyms"].split(";") if s.strip()),
+                    row=reader.line_num,
+                )
+            )
     except csv.Error as exc:
         raise StageError("resolve", f"row {reader.line_num}: malformed CSV: {exc}", source) from exc
     if not rows:

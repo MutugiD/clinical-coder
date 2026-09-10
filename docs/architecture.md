@@ -1,90 +1,201 @@
-# Architecture and interfaces
+# Clinical coder architecture
 
-The CLI loads UTF-8 files and invokes four services through shared, schema-enforced
-Python boundaries. HTTP wrappers expose the same request and response objects.
-Payloads carry content rather than server-side file paths. This makes the resolver
-independent of the extraction host and keeps filesystem handling at the CLI edge.
+## System boundaries
+
+Model-assisted evidence selection is separated from deterministic validation,
+catalogue lookup, and guideline extraction. Only the extraction provider adapter
+may invoke a model. The resolver and knowledge components must not import or call
+provider clients.
+
+The CLI is the filesystem boundary: it reads explicit paths, parses UTF-8 content,
+invokes stage functions, and writes validated artifacts. HTTP wrappers receive
+content in JSON rather than arbitrary server-side paths. Both forms use identical
+stage contracts.
+
+Extraction and validation implement the flow below. The resolver, knowledge, service,
+and pipeline sections specify their integration design; completion is tracked in
+GitHub Issues.
 
 ```mermaid
 flowchart LR
-  CLI --> Extract
-  Extract --> Validate
-  Validate --> Resolve
-  Resolve --> Knowledge
-  Extract --> Log
-  Validate --> Log
-  Resolve --> Log
-  Knowledge --> Log
+    Transcript --> Loader
+    Loader --> Evidence[Source clauses and question context]
+    Evidence --> Selection[Explicit extraction mode]
+    Selection --> Renderer[Deterministic renderer]
+    Renderer --> Validator[Independent validator]
+    Validator --> Note[Validated note]
+    Note --> Resolver[Deterministic resolver]
+    Register --> Resolver
+    Note -. optional prose .-> Knowledge[Guideline extraction]
+    Guideline --> Knowledge
+    Resolver --> Resolved[Resolved artifact]
+    Knowledge --> Rules[Cited rules]
+    Validator --> Audit[Stage audit]
+    Resolver --> Audit
+    Knowledge --> Audit
 ```
 
-Extraction will propose evidence-backed elements through local Ollama or direct
-Google Gemini, selected explicitly. Offline mode will use validated content-based
-replay or conservative rules without provider access. Validation decides
-whether the note can proceed. Resolution reads only the validated note and register;
-knowledge reads only the guideline and optional validated note. Neither resolution
-nor knowledge imports the model adapter. Each service has a separately addressable
-health endpoint and one POST processing endpoint. Pipeline execution is in-process
-to avoid requiring Docker for the grading CLI.
+## Component responsibilities
 
-## Public data contracts
+| Component | Responsibility | Prohibited behavior |
+| --- | --- | --- |
+| CLI/loaders | Arguments, strict parsing, file errors, output writing | Guessing absent input |
+| Evidence processor | Preserve turns, segment clauses, identify context | Inventing or translating values |
+| Provider adapters | Bounded source selection | Receiving the register or emitting codes |
+| Renderer | Copy evidence and attach source-derived metadata | Free clinical summarization |
+| Validator | Verify source, numbers, attribution, and scope | Model-based acceptance |
+| Resolver | Kind-aware lookup and ranked alternatives | Inferring diagnoses or calling models |
+| Knowledge extractor | Source-derived rules and quotations | External clinical knowledge |
+| Pipeline/audit | Contracts, sequencing, terminal records | Treating stale output as success |
 
-`schemas/` holds draft 2020-12 JSON Schemas. Every input and output is checked at
-the shared boundary, and HTTP additionally validates requests and responses. The
-note has exactly Appendix A's section keys; each value is NOT_STATED or a nonempty
-list. Each element has value, span {ref, text}, confidence, and assessment certainty
-where required. Extra element metadata is allowed for attribution and auditability.
+Application code is under `src/clinical_scribe`; tests and independent fixtures are
+under `src/tests`. Public schemas are in `schemas/`, exact prompts in `prompts/`,
+and design documents in `docs/`.
 
-context_span has the same {ref, text} shape as span, but supplies conversational
-context rather than evidence for the value or its numbers. conflict has {id,
-reason}; contradictory elements share an id and each retains its own primary span.
+## Extraction data flow
 
-Resolve preserves all sections and elements, adding code, code_system, confidence,
-alternatives, and status. NOT_STATED stays a string. For unresolved elements code
-is null and code_system is the empty string. An ambiguous result also has null code.
-Extraction confidence can be retained as extraction_confidence when the required
-confidence field becomes the matching score.
+1. Parse speaker turns without rewriting evidence. Reject invalid timestamps,
+   unsupported speakers, empty turns, and duplicate source references.
+2. Segment complete clauses while preserving decimals and clinical qualifiers.
+   Associate patient replies with supported preceding doctor questions.
+3. Identify conservative candidate sections from speaker, context, and explicit
+   clinical cues. Retain the original turn and quotation for every candidate.
+4. Obtain source selections through the requested mode. Model output contains
+   identifiers and permitted sections, not clinical prose or codes.
+5. Copy selected source excerpts into values; attach timestamps, attribution,
+   contextual spans, source-derived certainty, and detected conflicts.
+6. Independently validate the resulting note before writing or returning it.
 
-Probable and differential diagnoses remain eligible for resolution, with certainty
-preserved. Conflicts and considered_and_rejected elements always remain uncoded.
+Unsupported selections fail. Removing an outer JSON Markdown fence is transport
+handling; editing clinical content is not. Invalid or incomplete provider output
+must not trigger a hidden provider switch or silent clinical repair.
 
-Knowledge returns rows, not_in_corpus, and prose. Row fields express conditions,
-actions, severity, alarm features, or test constraints; source, section, page, and
-quote are mandatory. The standalone command has no patient input unless --note
-is supplied, so its prose is conditional. Pipeline supplies the validated note.
-Neither rows nor not_in_corpus may depend on that optional note.
+### Provider and offline modes
 
-## Execution configuration
+Ollama uses a configured endpoint/model, temperature zero, disabled thinking,
+CPU inference, bounded context, and bounded output. The default is qwen3:1.7b.
+Readiness distinguishes executable, server, and model availability.
 
-The CLI accepts --provider ollama|gemini or --offline for check, extract, and
-pipeline. An explicit provider overrides SCRIBE_PROVIDER; offline ignores provider
-environment settings. Explicit --provider together with --offline is a usage error.
-Local Ollama defaults to qwen3:1.7b. Gemini uses GEMINI_API_KEY and defaults to
-gemini-3.1-flash-lite. Provider failures are visible and never switch execution mode.
+Gemini uses generateContent with GEMINI_API_KEY in a header and a configurable
+model. Require a completed response and validate its selection schema. Readiness
+checks metadata access; it does not establish generation quota or clinical accuracy.
 
-These arguments and readiness diagnostics exist in the CLI milestone. Extraction
-adapters, offline replay, and runtime service enforcement follow in their scheduled
-milestones; schema availability alone does not mean a service is implemented.
+Offline execution compares canonical transcript content with a replay manifest.
+A match requires note-hash verification and validation against the actual input.
+Otherwise use conservative rules or explicitly abstain when patient content cannot
+be classified safely. Offline execution never contacts a provider.
 
-## Failure and audit boundaries
+An explicit --provider overrides SCRIBE_PROVIDER. --offline excludes explicit
+--provider and ignores provider environment settings. Timeout, authentication
+failure, and invalid generation do not select a different execution mode.
 
-Exit 0 means success; exit 1 means processing/validation failure; argparse uses exit
-2 for incorrect usage. Errors name the stage and input, with a row where possible.
-CLI diagnostics use stderr. Output files are replaced atomically only after a
-successful stage. Existing pipeline artifacts are not silently reused.
+## Data and provenance contracts
 
-Run logs contain one terminal record per stage, including skipped stages after a
-failure. Hash file content or canonical JSON at each stage; use SHA-256 of empty
-bytes for an absent output. Model and prompt_hash are null outside extraction.
-Timestamp records use timezone-aware ISO 8601. Logs do not include transcript text.
+The note has exactly the 13 Appendix A sections. Each is NOT_STATED or a nonempty
+list. Required element fields are value, span {ref,text}, and confidence; assessment
+also requires certainty. Extra metadata cannot weaken those requirements.
 
-## Scaling and rule changes
+Primary spans supply factual evidence. context_span explains a conversational
+relationship but cannot supply missing facts or numbers. Attribution records the
+source speaker. Rejected thinking-aloud uses considered_and_rejected. Contradictory
+statements share conflict {id,reason}, each with its own primary span.
 
-At ten times the load, queue extraction with bounded concurrency and explicit
-timeouts; scale validation and resolution independently. Monitor queue age, model
-latency/errors, rejected facts, unresolved/ambiguous rates, schema failures and
-stage completion. Do not place patient content in metrics labels or routine logs.
+The renderer's confidence of 1.0 describes exact evidence copying, not diagnostic
+probability or extraction completeness. Clinical certainty is separate. Evaluate
+coverage independently from grounding validity.
 
-Version normalization and matching rules with the catalogue hash. Keep immutable
-resolved artifacts and opt-in replay of affected notes; releasing a rules version
-does not rewrite history. At catalogue scale, build kind-partitioned alias indexes
-and deterministic candidate retrieval with stable ordering and logged scoring.
+## Independent validation
+
+Accept source-backed values and a small documented set of numeric/unit equivalents.
+Check complete clinical clauses so a shortened span cannot remove a negation,
+uncertainty cue, or numerical association unnoticed. Unsupported paraphrases fail
+even when a human might consider them equivalent.
+
+Numeric normalization covers supported English/Swahili number words and explicit
+unit/format changes. Ordered tokens preserve decimal meaning and signs. Validation
+does not compare an unordered bag of digits.
+
+Source-derived scope blocks family history in assessment, medication use presented
+as an undocumented prior diagnosis, and questions presented as symptoms. Companion
+attribution and rejection markers must agree with source roles and wording.
+Recursive inspection rejects code patterns anywhere in the note.
+
+Conflict checks compare supported assertions independently of model markers and
+require both conflicting statements to remain represented. They cover explicit
+supported cases, not unrestricted semantic contradictions. Ambiguous corrections
+and chronology require clinical review and additional evaluation.
+
+## Resolution boundary
+
+The request contains note and register content. Validate the catalogue before lookup,
+partition by kind, normalize names and aliases, and rank candidates deterministically.
+Surgical context permits procedures; family history must not become a patient
+diagnosis. Probable/differential diagnoses retain certainty when resolved.
+
+Conflicts, rejected material, and unsupported matches remain uncoded. Preserve
+evidence and return code, code_system, matching confidence, alternatives, and status.
+Keep extraction confidence separately where needed. Matching scores are explainable
+lookup evidence rather than calibrated clinical probabilities.
+
+## Knowledge boundary
+
+The request contains source text and optional note. Parse citation metadata and
+supported recommendations from the source alone. Produce drug-class rules, alarm
+features, test constraints, and explicit corpus gaps. Verify every quotation as an
+exact substring. Optional note input affects under-200-word prose only; rows and
+not_in_corpus must remain invariant to it.
+
+## Service interfaces and deployment
+
+The design uses extract, validate, resolve, and knowledge processes from one image.
+Each exposes GET /health returning {name,version} and POST /process.
+
+| Service | Request | Successful response |
+| --- | --- | --- |
+| Extract | {transcript} | note |
+| Validate | {transcript,note} | {valid:true} |
+| Resolve | {note,register} | resolved note |
+| Knowledge | {source,note?} | {rows,not_in_corpus,prose} |
+
+Load draft 2020-12 schemas into an offline registry; schema references never require
+network retrieval. Shared boundaries validate inputs before execution and outputs
+before returning. HTTP maps invalid inputs to 422, unavailable dependencies to 503,
+and unexpected failures to 500 with bounded details. Health reports liveness;
+extraction readiness checks dependencies separately.
+
+Compose starts each service independently. Only extraction needs provider settings.
+The CLI pipeline invokes the same stage functions in-process, avoiding unnecessary
+HTTP dependencies for command-line execution.
+
+## Failure, artifacts, and audit
+
+Usage errors exit 2; processing/validation errors exit 1. Diagnostics use stderr.
+Strict JSON rejects duplicate keys and non-finite values. CSV errors identify the
+register and row where possible. Unexpected exceptions remain visible.
+
+Write through temporary files and atomic replacement after success. A failed write
+preserves an existing target. Pipeline orchestration must prevent prior artifacts
+from being mistaken for the current run, retain completed stages on later failure,
+and explicitly skip dependent stages.
+
+Each audit record includes run_id, stage, timezone-aware timestamp, status,
+input_hash, output_hash, model, prompt_hash, and message. Hash canonical JSON or
+source content consistently; absent output uses the hash of empty bytes. Record
+replay/rules honestly without a model call, retaining original generation metadata
+in the manifest. Do not put transcript text or keys into routine diagnostics.
+
+## Scaling and operational evolution
+
+At ten times the load, queue extraction with bounded concurrency and backpressure.
+Scale inexpensive deterministic workers independently. Cache immutable catalogue
+indexes by content hash and keep rules versioned. No shared mutable patient store
+is needed for this stateless pipeline.
+
+Monitor queue age, provider availability, stage latency, schema failures, rejected
+numbers, conflict rates, and unresolved/ambiguous matches. Evaluate coverage on
+labelled datasets: a high validation pass rate can conceal omissions.
+
+For large catalogues, use kind-partitioned alias indexes and bounded deterministic
+candidate retrieval. Version normalization, indexes, and scoring. New releases
+affect new decisions; replay of historical records is explicit and scoped to
+affected data, never a silent rewrite.

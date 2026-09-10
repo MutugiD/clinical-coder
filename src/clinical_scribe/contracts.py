@@ -28,9 +28,7 @@ def enforce(name: str, payload: Any, stage: str) -> None:
     root, registry = schema_registry()
     if name not in root["$defs"]:
         raise StageError(stage, f"unknown contract: {name}", "schemas")
-    validator = Draft202012Validator(
-        {"$ref": root["$id"] + "#/$defs/" + name}, registry=registry
-    )
+    validator = Draft202012Validator({"$ref": root["$id"] + "#/$defs/" + name}, registry=registry)
     error = next(validator.iter_errors(payload), None)
     if error is not None:
         path = ".".join(map(str, error.absolute_path)) or "$"

@@ -18,7 +18,7 @@ jobs:
       - run: pip install --no-deps --no-build-isolation -e .
       - run: ruff check .
       - run: pytest -q
-      - run: python -m compileall -q src tests
+      - run: python -m compileall -q src
       - run: ./scribe --version
   container:
     runs-on: ubuntu-latest

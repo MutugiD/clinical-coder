@@ -1,0 +1,7 @@
+[00:00] DOCTOR: What brings you in today?
+[00:03] PATIENT: I have a cough for three days.
+[00:08] DOCTOR: Any cough or vomiting?
+[00:12] PATIENT: No cough. No vomiting.
+[00:18] DOCTOR: Any medicines?
+[00:21] PATIENT: Examplemed one tablet daily.
+[00:28] PATIENT: Examplemed two tablets daily.

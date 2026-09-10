@@ -6,4 +6,4 @@ __pycache__
 .pytest_cache
 .ruff_cache
 instructions-data/
-doc/feature-contexts.md
+docs/feature-contexts.md

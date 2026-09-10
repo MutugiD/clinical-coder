@@ -15,8 +15,8 @@ paraphrases must be rejected rather than assumed true.
 Timestamp references must identify one source line. Reject duplicate timestamps
 instead of choosing an arbitrary line. PATIENT and clinician observations are
 different sources. Companion material, if retained, needs companion attribution;
-rejected thinking-aloud needs considered_and_rejected. The initial extractor omits
-both from patient facts. Questions and conditional safety-net advice are not
+rejected thinking-aloud needs considered_and_rejected. The extractor omits companion material and retains rejected thinking-aloud
+only with an explicit exclusion marker. Questions and conditional safety-net advice are not
 positive symptoms. Past surgery and family history retain their context.
 
 An optional context_span identifies the preceding question or another relevant
@@ -58,25 +58,23 @@ not_in_corpus depend solely on the guideline. Optional --note changes prose only
 source-only prose is conditional and does not assume the sample consultation.
 
 The evaluator uses a fresh CPU-only machine. The local default is qwen3:1.7b;
-accuracy and CPU latency are unverified until the extraction milestone. The earlier
-Gemini Ollama alias was retired; a successful cloud GLM probe does not establish
-local grading readiness.
+CPU measurements and validation outcomes are recorded in evaluation.md.
+Direct Gemini generation has not been verified live without a configured key.
 
 Select Ollama or direct Google Gemini through --provider or SCRIBE_PROVIDER.
 Gemini reads GEMINI_API_KEY, with GEMINI_MODEL configurable. There is no automatic
 provider switch after failure. --offline excludes explicit --provider and ignores
 unrelated provider environment configuration.
 
-Offline mode will replay committed outputs only for a content-hash match of the
+Offline mode replays committed outputs only for a content-hash match of the
 provided transcript, then independently revalidate the note. Unseen inputs use
 conservative deterministic extraction or fail clearly when unsupported. Replay
 must never match by filename alone, contact a provider, or disguise stale output
 as a fresh extraction. Runtime logs identify replay versus model generation.
 
-At the CLI milestone these execution paths are declared but unimplemented.
-Readiness reports missing dependencies and then reports the unfinished extraction
-path rather than return success. Five-command grading setup including model pull,
-CPU measurements, and actual provider verification remain delivery gates.
+Readiness verifies the selected provider dependency and model metadata, or local
+replay artifacts in offline mode. It does not claim that a remote generation will
+succeed or that later pipeline stages are complete. Provider failures remain explicit.
 
 ## Team exercise and authorship
 

@@ -11,4 +11,4 @@ dist/
 .env
 instructions-data/
 .work/
-doc/feature-contexts.md
+docs/feature-contexts.md
