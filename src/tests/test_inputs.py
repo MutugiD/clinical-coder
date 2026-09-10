@@ -18,13 +18,18 @@ def test_invalid_json(text):
         parse_json(text, "validate")
 
 
-@pytest.mark.parametrize("text", [
-    "", "kind,code,name,synonyms\n", "kind,name,synonyms\ndrug,Example,alias\n",
-    "kind,code,name,synonyms\ndrug,X,Example,alias,extra\n",
-    'kind,code,name,synonyms\ndrug,X,"unfinished\n',
-    "kind,code,name,synonyms\ndrug,X,Example,alias\nlab,X,Test,test\n",
-    "kind,code,name,synonyms\ndrug,,Example,alias\n",
-])
+@pytest.mark.parametrize(
+    "text",
+    [
+        "",
+        "kind,code,name,synonyms\n",
+        "kind,name,synonyms\ndrug,Example,alias\n",
+        "kind,code,name,synonyms\ndrug,X,Example,alias,extra\n",
+        'kind,code,name,synonyms\ndrug,X,"unfinished\n',
+        "kind,code,name,synonyms\ndrug,X,Example,alias\nlab,X,Test,test\n",
+        "kind,code,name,synonyms\ndrug,,Example,alias\n",
+    ],
+)
 def test_broken_registers(text):
     with pytest.raises(StageError, match="resolve: trial.csv"):
         parse_register(text, "trial.csv")
@@ -36,11 +41,17 @@ def test_valid_register_and_blank_lines():
     assert rows[0].row == 3
 
 
-@pytest.mark.parametrize("text", [
-    "", "[00:01] OTHER: hello", "[00:70] PATIENT: hi", "[00:01] PATIENT: ",
-    "[00:02] PATIENT: hi\n[00:01] DOCTOR: hello",
-    "[00:01] PATIENT: hi\n[00:01] DOCTOR: hello",
-])
+@pytest.mark.parametrize(
+    "text",
+    [
+        "",
+        "[00:01] OTHER: hello",
+        "[00:70] PATIENT: hi",
+        "[00:01] PATIENT: ",
+        "[00:02] PATIENT: hi\n[00:01] DOCTOR: hello",
+        "[00:01] PATIENT: hi\n[00:01] DOCTOR: hello",
+    ],
+)
 def test_invalid_transcripts(text):
     with pytest.raises(StageError):
         parse_transcript(text)
@@ -71,9 +82,18 @@ def test_invalid_utf8_cli(tmp_path):
     transcript = tmp_path / "bad.txt"
     transcript.write_bytes(b"\xff\xfe\x00")
     result = subprocess.run(
-        [sys.executable, "scribe", "extract", "--transcript", str(transcript),
-         "--out", str(tmp_path / "note.json")],
-        capture_output=True, text=True, check=False,
+        [
+            sys.executable,
+            "scribe",
+            "extract",
+            "--transcript",
+            str(transcript),
+            "--out",
+            str(tmp_path / "note.json"),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
     )
     assert result.returncode == 1
     assert "bad.txt" in result.stderr and "UTF-8" in result.stderr
@@ -83,10 +103,13 @@ def test_invalid_utf8_cli(tmp_path):
 def test_required_shape_and_confidence():
     note = empty_note()
     enforce("note", note, "validate")
-    note["assessment"] = [{
-        "value": "possible condition", "span": {"ref": "[00:00]", "text": "condition"},
-        "confidence": 1.1,
-    }]
+    note["assessment"] = [
+        {
+            "value": "possible condition",
+            "span": {"ref": "[00:00]", "text": "condition"},
+            "confidence": 1.1,
+        }
+    ]
     with pytest.raises(StageError):
         enforce("note", note, "validate")
 
@@ -103,9 +126,18 @@ def test_config_is_explicit(monkeypatch):
 def test_missing_file_cli(tmp_path):
     missing = tmp_path / "missing.txt"
     result = subprocess.run(
-        [sys.executable, "scribe", "extract", "--transcript", str(missing),
-         "--out", str(tmp_path / "note.json")],
-        capture_output=True, text=True, check=False,
+        [
+            sys.executable,
+            "scribe",
+            "extract",
+            "--transcript",
+            str(missing),
+            "--out",
+            str(tmp_path / "note.json"),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
     )
     assert result.returncode == 1
     assert result.stdout == ""

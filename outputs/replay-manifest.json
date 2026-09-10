@@ -1,0 +1,7 @@
+{
+  "transcript_hash": "sha256:856e5e838d9f6c95e1da2ef0a3f77f182c10ecca21f03e17b0773f8cc27c3c96",
+  "note_hash": "sha256:a0fcca4a9f1ff69924400f419e4345c5c9bb105ae0024559f68baa205c3cce47",
+  "mode": "model",
+  "model": "ollama/qwen3:1.7b",
+  "prompt_hash": "sha256:bf789178110ce7cf99b44971b071941a4b2d99f9b2790b2f013ae9d29f69c632"
+}

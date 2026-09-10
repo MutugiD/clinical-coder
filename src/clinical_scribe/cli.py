@@ -8,9 +8,12 @@ from clinical_scribe import __version__
 from clinical_scribe.config import Settings
 from clinical_scribe.contracts import enforce
 from clinical_scribe.errors import StageError
+from clinical_scribe.extraction import extract
 from clinical_scribe.loaders import parse_register, read_json, read_text
+from clinical_scribe.output import write_json
 from clinical_scribe.readiness import check
 from clinical_scribe.transcript import parse_transcript
+from clinical_scribe.validation import validate
 
 
 def parser() -> argparse.ArgumentParser:
@@ -49,6 +52,14 @@ def dispatch(args: argparse.Namespace) -> None:
         settings = Settings.from_env(args.provider, offline=args.offline)
     if stage == "check":
         check(settings)
+        return
+    if stage == "extract":
+        transcript = read_text(args.transcript, stage)
+        note, _ = extract(transcript, settings)
+        write_json(args.out, note, stage)
+        return
+    if stage == "validate":
+        validate(read_text(args.transcript, stage), read_json(args.note, stage))
         return
     if hasattr(args, "transcript"):
         parse_transcript(read_text(args.transcript, stage), stage)

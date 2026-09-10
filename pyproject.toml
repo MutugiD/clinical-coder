@@ -17,9 +17,10 @@ scribe = "clinical_scribe.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+include = ["clinical_scribe*"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["src/tests"]
 pythonpath = ["src"]
 
 [tool.ruff]

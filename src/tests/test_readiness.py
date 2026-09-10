@@ -21,6 +21,7 @@ def test_missing_model(monkeypatch):
 def test_unreachable_ollama(monkeypatch):
     def fail(*args, **kwargs):
         raise httpx.ConnectError("connection refused")
+
     monkeypatch.setattr(httpx, "get", fail)
     with pytest.raises(StageError, match="Ollama unavailable"):
         check()

@@ -111,13 +111,12 @@ def test_remote_ollama_does_not_require_local_executable(monkeypatch):
         check(Settings(base_url="http://remote-ollama:11434"))
 
 
-def test_ollama_dependency_success_does_not_claim_extraction_ready(monkeypatch):
+def test_ollama_dependency_success(monkeypatch):
     monkeypatch.setattr("clinical_scribe.readiness.shutil.which", lambda name: "/bin/ollama")
     monkeypatch.setattr(
         httpx, "get", lambda *a, **kw: response(body={"models": [{"name": "qwen3:1.7b"}]})
     )
-    with pytest.raises(StageError, match="dependencies found, but extraction is not implemented"):
-        check(Settings())
+    assert check(Settings()) is None
 
 
 def test_missing_gemini_key_does_not_contact_network(monkeypatch):
@@ -129,7 +128,7 @@ def test_missing_gemini_key_does_not_contact_network(monkeypatch):
         check(Settings(provider="gemini"))
 
 
-def test_gemini_key_uses_header_and_does_not_claim_extraction_ready(monkeypatch):
+def test_gemini_key_uses_header(monkeypatch):
     settings = Settings(provider="gemini", gemini_api_key="example-test-key")
 
     def metadata(url, **kwargs):
@@ -144,8 +143,7 @@ def test_gemini_key_uses_header_and_does_not_claim_extraction_ready(monkeypatch)
         )
 
     monkeypatch.setattr(httpx, "get", metadata)
-    with pytest.raises(StageError, match="extraction is not implemented"):
-        check(settings)
+    assert check(settings) is None
 
 
 @pytest.mark.parametrize("status", [401, 403, 404, 429, 500])
@@ -183,10 +181,14 @@ def test_malformed_gemini_metadata(monkeypatch, body):
         check(Settings(provider="gemini", gemini_api_key="example-test-key"))
 
 
-def test_offline_readiness_is_not_success_without_implementation(monkeypatch):
+def test_offline_readiness_requires_artifacts(monkeypatch):
     def fail(*args, **kwargs):
         pytest.fail("offline mode must not contact providers")
 
     monkeypatch.setattr(httpx, "get", fail)
-    with pytest.raises(StageError, match="offline.*not implemented"):
+    monkeypatch.setattr(
+        "clinical_scribe.readiness.Path.is_file",
+        lambda path: str(path).replace("\\", "/") == "prompts/extract.txt",
+    )
+    with pytest.raises(StageError, match="offline replay artifacts missing"):
         check(Settings(offline=True))
