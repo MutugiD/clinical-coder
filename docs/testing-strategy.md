@@ -23,3 +23,20 @@ and CodeQL. Once services exist, exercise Compose health plus actual processing.
 Before hand-in, run real Ollama extraction, independent validation, a complete
 pipeline, and a fresh Linux clone using the README commands. Record observed
 results and limitations rather than predicting that checks will pass.
+
+## Clarification acceptance cases
+
+Verify conflict preservation with both statements uncoded, probable/differential
+resolution with unchanged certainty, and exclusion of considered_and_rejected
+elements. A number appearing only in context_span cannot justify a value. Check
+that optional --note does not change knowledge rows or not_in_corpus.
+
+Test explicit provider selection, missing executable/server/model/key, HTTP errors,
+malformed provider responses, and refusal to silently switch modes. Offline tests
+block all network access, rename the known transcript, mutate its contents, tamper
+with cached notes, and exercise unseen supported and unsupported cases. Run CPU-only
+benchmarks with hardware, cold/warm latency, and validation outcomes recorded.
+
+The CLI milestone tests configuration and metadata shapes only. Clinical conflict,
+certainty, contextual evidence, replay, and provider generation tests belong to the
+subsequent implementation milestones, not the current passing test count.
