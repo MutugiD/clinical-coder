@@ -5,6 +5,12 @@ from clinical_scribe.errors import StageError
 from clinical_scribe.readiness import check
 
 
+@pytest.fixture(autouse=True)
+def local_dependencies(monkeypatch):
+    monkeypatch.setenv("SCRIBE_PROVIDER", "ollama")
+    monkeypatch.setattr("clinical_scribe.readiness.shutil.which", lambda name: "/bin/ollama")
+
+
 def test_missing_model(monkeypatch):
     response = httpx.Response(200, json={"models": []}, request=httpx.Request("GET", "http://x"))
     monkeypatch.setattr(httpx, "get", lambda *a, **kw: response)

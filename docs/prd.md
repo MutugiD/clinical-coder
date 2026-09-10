@@ -37,3 +37,17 @@ derived submission outputs are separate from the supplied input directory.
 No UI, database, speech model, external medical corpus, production deployment, or
 automatic historical recoding is included. Partial implementation must fail or log
 skipped work explicitly; a successful final pipeline cannot contain placeholders.
+
+## Reviewer clarifications received 2026-09-10
+
+Preserve contradictory statements with per-element conflict markers and no code.
+Resolve probable and differential diagnoses while preserving certainty; never code
+considered_and_rejected material. Permit contextual spans without treating them as
+fact evidence. Keep mixed-language values when translation introduces uncertainty.
+The standalone knowledge command must derive rows and corpus gaps from the source
+alone; an optional note affects only prose.
+
+Grading runs on a fresh CPU-only machine. Provide a small local Ollama model, a
+model pull within the final five-command setup, Appendix A offline replay, and a
+direct provider-key path. Google Gemini is the selected hosted path. Measure local
+latency and validation before claiming the default model is suitable.

@@ -5,6 +5,7 @@ import sys
 import traceback
 
 from clinical_scribe import __version__
+from clinical_scribe.config import Settings
 from clinical_scribe.contracts import enforce
 from clinical_scribe.errors import StageError
 from clinical_scribe.loaders import parse_register, read_json, read_text
@@ -16,9 +17,12 @@ def parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="scribe")
     parser.add_argument("--version", action="version", version=__version__)
     commands = parser.add_subparsers(dest="command", required=True)
-    commands.add_parser("check")
+    readiness = commands.add_parser("check")
+    execution_arguments(readiness)
     for name in ("extract", "validate", "resolve", "knowledge", "pipeline"):
         command = commands.add_parser(name)
+        if name in ("extract", "pipeline"):
+            execution_arguments(command)
         if name in ("extract", "validate", "pipeline"):
             command.add_argument("--transcript", required=True)
         if name in ("validate", "resolve", "knowledge"):
@@ -32,10 +36,19 @@ def parser() -> argparse.ArgumentParser:
     return parser
 
 
+def execution_arguments(command: argparse.ArgumentParser) -> None:
+    mode = command.add_mutually_exclusive_group()
+    mode.add_argument("--provider", choices=("ollama", "gemini"), default=None)
+    mode.add_argument("--offline", action="store_true")
+
+
 def dispatch(args: argparse.Namespace) -> None:
     stage = args.command
+    settings = None
+    if stage in ("check", "extract", "pipeline"):
+        settings = Settings.from_env(args.provider, offline=args.offline)
     if stage == "check":
-        check()
+        check(settings)
         return
     if hasattr(args, "transcript"):
         parse_transcript(read_text(args.transcript, stage), stage)
