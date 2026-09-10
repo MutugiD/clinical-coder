@@ -2,8 +2,8 @@
 
 Clinical coder produces source-backed clinical notes from speaker-labelled English
 and Swahili consultations. It preserves verbatim evidence and validates notes before
-writing them. Separate contracts define deterministic coding and cited guideline
-knowledge for an auditable clinical workflow.
+writing them. Deterministic register lookup adds codes, while guideline extraction
+produces cited rules for clinical review.
 
 [Requirements](docs/prd.md) · [Architecture](docs/architecture.md) ·
 [Design decisions](docs/decisions.md) · [Testing](docs/testing-strategy.md) ·
@@ -82,6 +82,25 @@ stable code ordering. Version normalization and contextual aliases with the
 register checksum; record selected aliases, alternatives and rule versions so each
 decision can be reproduced. Review synonym changes against a frozen evaluation
 set before releasing a new catalogue.
+
+## Extract guideline knowledge
+
+```sh
+./scribe knowledge --source guideline.txt --out results/knowledge.json
+./scribe knowledge --source guideline.txt --note results/note.json --out results/knowledge.json
+```
+
+The source alone determines drug-class rules, red flags, test constraints and
+`not_in_corpus` gaps. Every row carries an exact quotation, source name, section
+and page. The optional note affects only the review prose, which stays below 200
+words. The committed example uses the supplied note for that prose.
+
+The deterministic parser supports one citation block in the supplied format:
+`SOURCE: Title, edition, Section X.Y, page N.`, followed by a matching section
+heading and supported recommendation sentences. Missing metadata, additional
+sections or unrecognised sentences fail explicitly. This is a bounded excerpt
+parser, not a general guideline-document reader. It uses no model or network and
+does not infer drug-class membership or replace clinical decisions.
 
 ## Verification
 

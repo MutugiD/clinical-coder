@@ -12,9 +12,9 @@ invokes stage functions, and writes validated artifacts. HTTP wrappers receive
 content in JSON rather than arbitrary server-side paths. Both forms use identical
 stage contracts.
 
-Extraction and validation implement the flow below. The resolver, knowledge, service,
-and pipeline sections specify their integration design; completion is tracked in
-GitHub Issues.
+The extraction, validation, resolver and knowledge functions implement the CLI
+stage boundaries. The HTTP and pipeline sections specify their integration design;
+delivery coverage is tracked in GitHub Issues.
 
 ```mermaid
 flowchart LR
@@ -168,6 +168,34 @@ supported recommendations from the source alone. Produce drug-class rules, alarm
 features, test constraints, and explicit corpus gaps. Verify every quotation as an
 exact substring. Optional note input affects under-200-word prose only; rows and
 not_in_corpus must remain invariant to it.
+
+The implemented `guideline-rules-v1` parser accepts one citation block with a
+source title, edition, section and positive page number. The body heading must
+match the cited section. Additional blocks and unsupported sentence structures
+fail before output is written. Sentence segmentation preserves original text,
+including decimal points and the `H. pylori` abbreviation.
+
+Supported templates extract conditional class recommendations, treatment dose and
+duration, comma-separated urgent referral features, and a test recommendation with
+an exposure lookback interval and rationale. Numbers and intervals remain in their
+source wording. `severity: recommendation` labels a recommendation; urgent referral
+rows receive `severity: urgent` from the source's explicit urgency. Neither field
+claims a disease severity assessment. Rule condition fields may use the cited
+section heading as scope, while the quotation identifies the recommendation.
+
+Corpus-gap checks inspect extracted treatment rules for a PPI dose in milligrams
+and guidance for patients under 18. Alarm age thresholds do not count as paediatric
+treatment guidance. These two questions are a bounded checklist, not an exhaustive
+inventory of missing clinical knowledge. Named medicines are not assigned to
+classes using external information.
+
+Output verification checks schema, each verbatim quotation, citation metadata,
+and equality with the complete ordered set of source-derived rows and gaps.
+Changing a dose or interval while retaining a valid quotation therefore fails.
+Duplicate and omitted rows fail as well. Optional note input is schema checked
+and influences only a bounded prose template; it is never passed to rule or gap
+derivation. Like direct resolution, optional-note processing does not substitute
+for transcript validation. The pipeline supplies its already validated note.
 
 ## Service interfaces and deployment
 
