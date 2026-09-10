@@ -2,7 +2,6 @@
 
 import argparse
 import sys
-import traceback
 
 from clinical_scribe import __version__
 from clinical_scribe.boundaries import process
@@ -39,7 +38,7 @@ def parser() -> argparse.ArgumentParser:
 
 def execution_arguments(command: argparse.ArgumentParser) -> None:
     mode = command.add_mutually_exclusive_group()
-    mode.add_argument("--provider", choices=("ollama", "gemini"), default=None)
+    mode.add_argument("--provider", choices=("gemini",), default=None)
     mode.add_argument("--offline", action="store_true")
 
 
@@ -90,6 +89,5 @@ def main() -> int:
         return 1
     except Exception:
         print(f"{args.command}: unexpected internal failure", file=sys.stderr)
-        traceback.print_exc(file=sys.stderr)
         return 1
     return 0

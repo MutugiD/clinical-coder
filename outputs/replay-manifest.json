@@ -1,7 +1,7 @@
 {
   "transcript_hash": "sha256:856e5e838d9f6c95e1da2ef0a3f77f182c10ecca21f03e17b0773f8cc27c3c96",
-  "note_hash": "sha256:a0fcca4a9f1ff69924400f419e4345c5c9bb105ae0024559f68baa205c3cce47",
+  "note_hash": "sha256:b7b9936e3391523f96859c11493285c90a534ef4ede5e82948b99c35240ae269",
   "mode": "model",
-  "model": "ollama/qwen3:1.7b",
-  "prompt_hash": "sha256:bf789178110ce7cf99b44971b071941a4b2d99f9b2790b2f013ae9d29f69c632"
+  "model": "gemini/gemini-3.1-flash-lite",
+  "prompt_hash": "sha256:2681aae948303ddd56f9839936efe345f48bb7b2f374761b9512fa6cff0ab88a"
 }

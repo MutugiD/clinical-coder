@@ -1,0 +1,15 @@
+[00:02] DOCTOR: What brings you in today?
+[00:07] PATIENT: Burning pain for six days.
+[00:12] COMPANION: I think he has an ulcer.
+[00:16] DOCTOR: Any cough or fever?
+[00:20] PATIENT: No cough but fever.
+[00:24] PATIENT: No fever.
+[00:28] DOCTOR: Any allergies?
+[00:32] PATIENT: Penicillin allergy.
+[00:36] PATIENT: No penicillin allergy.
+[00:40] DOCTOR: Any medicines?
+[00:44] PATIENT: I take diclofenac and Panadol.
+[00:48] NURSE: Pulse 78. Temperature 37.4.
+[00:52] DOCTOR: I think gastritis.
+[00:55] DOCTOR: But no.
+[00:59] DOCTOR: Possible reflux. Come back in three days.

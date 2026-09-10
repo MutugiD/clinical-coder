@@ -71,17 +71,16 @@ must not trigger a hidden provider switch or silent clinical repair.
 
 ### Provider and offline modes
 
-Ollama uses a configured endpoint/model, temperature zero, disabled thinking,
-CPU inference, bounded context, and bounded output. The default is qwen3:1.7b.
-Readiness distinguishes executable, server, and model availability.
-
-Gemini uses generateContent with GEMINI_API_KEY in a header and a configurable
-model. Require a completed response and validate its selection schema. Readiness
-checks metadata access; it does not establish generation quota or clinical accuracy.
+Gemini is the sole live provider, defaulting to gemini-3.1-flash-lite. It uses
+GenerateContent with GEMINI_API_KEY in a header, temperature zero, a JSON response
+schema, bounded output and a configurable timeout. Readiness checks model metadata
+access; it does not establish generation quota or clinical accuracy. A response
+must finish successfully and select every eligible evidence ID with every required
+section. Duplicate, missing, invalid or incomplete selections fail explicitly.
 
 Offline execution compares canonical transcript content with a replay manifest.
 A match requires note-hash verification and validation against the actual input.
-Otherwise use conservative rules or explicitly abstain when patient content cannot
+Otherwise use conservative rules or explicitly abstain when clinical content cannot
 be classified safely. Offline execution never contacts a provider.
 
 An explicit --provider overrides SCRIBE_PROVIDER. --offline excludes explicit
@@ -199,7 +198,7 @@ for transcript validation. The pipeline supplies its already validated note.
 ## Service interfaces and deployment
 
 Compose runs extract, validate, resolve, and knowledge processes from one image.
-Each exposes GET /health returning {service,name,version} and POST /process.
+Each exposes GET /health returning {service,version} and POST /process.
 
 | Service | Request | Successful response |
 | --- | --- | --- |
@@ -236,7 +235,7 @@ stack offline and sends health, processing and invalid-input requests.
 
 Usage errors exit 2; processing/validation errors exit 1. Diagnostics use stderr.
 Strict JSON rejects duplicate keys and non-finite values. CSV errors identify the
-register and row where possible. Unexpected exceptions remain visible.
+register and row where possible. Unexpected exceptions return bounded errors without exposing internal request data.
 
 Write through temporary files and atomic replacement after success. A failed write
 preserves an existing target. Extracted notes are held in memory until the separate
@@ -285,3 +284,19 @@ For large catalogues, use kind-partitioned alias indexes and bounded determinist
 candidate retrieval. Version normalization, indexes, and scoring. New releases
 affect new decisions; replay of historical records is explicit and scoped to
 affected data, never a silent rewrite.
+
+## Submission review safeguards
+
+Question scope tracks individual symptom concepts. Unasked negatives remain in HPI;
+validation prevents moving them to ROS. Mixed contrast clauses have independent
+polarity and exact spans. Standalone rejections bind only to the immediately preceding
+clinician assessment, including an adjacent clinician turn; an unbound rejection fails.
+Opposing named allergies share conflict markers, and conflicting concepts stay uncoded.
+Explicit historical periods are kept separate. Unrecognised corrections, coordinated
+medication negation and shared medication qualifiers fail for clinician review.
+
+Bare coordinated medicines are separate evidence elements. No dose or frequency is
+copied into a second element from context. Unknown clinical turns fail extraction;
+questions, recognised greetings, acknowledgements and omitted companion speech are
+explicit exceptions. These lexical boundaries are conservative, not unrestricted
+semantic interpretation. Clinical coverage still needs independent expected facts.

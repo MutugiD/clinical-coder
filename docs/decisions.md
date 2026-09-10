@@ -57,14 +57,14 @@ The knowledge command must work with --source and --out alone. Rows and
 not_in_corpus depend solely on the guideline. Optional --note changes prose only;
 source-only prose is conditional and does not assume the sample consultation.
 
-The evaluator uses a fresh CPU-only machine. The local default is qwen3:1.7b;
-CPU measurements and validation outcomes are recorded in evaluation.md.
-Direct Gemini generation has not been verified live without a configured key.
+The final submission uses Gemini as the sole live provider, with
+GEMINI_MODEL defaulting to gemini-3.1-flash-lite and GEMINI_API_KEY supplied through
+the environment. Project-level Ollama support was removed; local installations
+were left untouched. Live evaluation outcomes are recorded in evaluation.md.
 
-Select Ollama or direct Google Gemini through --provider or SCRIBE_PROVIDER.
-Gemini reads GEMINI_API_KEY, with GEMINI_MODEL configurable. There is no automatic
+An explicit --provider gemini overrides SCRIBE_PROVIDER. There is no automatic
 provider switch after failure. --offline excludes explicit --provider and ignores
-unrelated provider environment configuration.
+provider environment configuration. No key is stored in the repository.
 
 Offline mode replays committed outputs only for a content-hash match of the
 provided transcript, then independently revalidate the note. Unseen inputs use

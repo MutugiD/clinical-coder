@@ -14,17 +14,16 @@ def response(status=200, body=None):
     return httpx.Response(status, json=body, request=httpx.Request("GET", "https://example.test"))
 
 
-def test_default_local_model(monkeypatch):
-    for variable in ("SCRIBE_PROVIDER", "OLLAMA_MODEL", "OLLAMA_BASE_URL"):
+def test_default_gemini_model(monkeypatch):
+    for variable in ("SCRIBE_PROVIDER", "GEMINI_MODEL"):
         monkeypatch.delenv(variable, raising=False)
     settings = Settings.from_env()
-    assert settings.provider == "ollama"
-    assert settings.model == "qwen3:1.7b"
+    assert settings.provider == "gemini"
+    assert settings.gemini_model == "gemini-3.1-flash-lite"
 
 
 def test_explicit_provider_wins_and_ignores_other_provider_config(monkeypatch):
-    monkeypatch.setenv("SCRIBE_PROVIDER", "ollama")
-    monkeypatch.setenv("OLLAMA_TIMEOUT_SECONDS", "invalid")
+    monkeypatch.setenv("SCRIBE_PROVIDER", "unsupported")
     monkeypatch.setenv("GEMINI_API_KEY", "example-test-key")
     settings = Settings.from_env("gemini")
     assert settings.provider == "gemini"
@@ -34,7 +33,7 @@ def test_explicit_provider_wins_and_ignores_other_provider_config(monkeypatch):
 
 def test_offline_ignores_invalid_provider_environment(monkeypatch):
     monkeypatch.setenv("SCRIBE_PROVIDER", "unsupported")
-    monkeypatch.setenv("OLLAMA_BASE_URL", "not-a-url")
+    monkeypatch.setenv("GEMINI_TIMEOUT_SECONDS", "invalid")
     assert Settings.from_env(offline=True).offline
 
 
@@ -98,25 +97,11 @@ def test_arguments_on_extract_and_pipeline(mode):
     assert extract.provider == pipeline.provider
 
 
-def test_missing_executable_is_actionable(monkeypatch):
-    monkeypatch.setattr("clinical_scribe.readiness.shutil.which", lambda name: None)
-    with pytest.raises(StageError, match="executable missing; install Ollama"):
-        check(Settings())
-
-
-def test_remote_ollama_does_not_require_local_executable(monkeypatch):
-    monkeypatch.setattr("clinical_scribe.readiness.shutil.which", lambda name: None)
-    monkeypatch.setattr(httpx, "get", lambda *a, **kw: response(body={"models": []}))
-    with pytest.raises(StageError, match="ollama pull qwen3:1.7b"):
-        check(Settings(base_url="http://remote-ollama:11434"))
-
-
-def test_ollama_dependency_success(monkeypatch):
-    monkeypatch.setattr("clinical_scribe.readiness.shutil.which", lambda name: "/bin/ollama")
-    monkeypatch.setattr(
-        httpx, "get", lambda *a, **kw: response(body={"models": [{"name": "qwen3:1.7b"}]})
-    )
-    assert check(Settings()) is None
+def test_removed_provider_is_rejected():
+    with pytest.raises(SystemExit):
+        parser().parse_args(["check", "--provider", "ollama"])
+    with pytest.raises(StageError, match="configuration"):
+        Settings.from_env("ollama")
 
 
 def test_missing_gemini_key_does_not_contact_network(monkeypatch):

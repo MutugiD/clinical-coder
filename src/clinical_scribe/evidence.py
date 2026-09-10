@@ -1,8 +1,9 @@
 """Conservative conversational scope and verbatim evidence segmentation."""
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
+from clinical_scribe.errors import StageError
 from clinical_scribe.transcript import Turn, parse_transcript
 
 FAMILY = re.compile(
@@ -30,7 +31,8 @@ EXAM = re.compile(
 )
 ASSESSMENT = re.compile(
     r"\b(diagnos\w*|assessment|most likely|probably|probable|differential|could be|"
-    r"may be|possible|i think|suspect\w*|consistent with|impression|confirmed)\b",
+    r"may be|possible|i think|suspect\w*|consistent with|impression|confirmed|"
+    r"you have|patient has|wondering whether)\b",
     re.I,
 )
 PLAN = re.compile(
@@ -58,6 +60,55 @@ class Evidence:
     sections: tuple[str, ...]
     context: Turn | None
     rejected: bool = False
+
+
+SYMPTOM_CONCEPTS = {
+    "vomiting": r"vomit\w*|kutapika",
+    "cough": r"cough\w*|kikohozi",
+    "fever": r"fever|homa",
+    "stool": r"stool|melaena|melena",
+    "weight": r"weight",
+    "diarrhoea": r"diarrh\w*",
+    "pain": r"pain|maumivu",
+    "breathing": r"breath\w*",
+    "swallowing": r"swallow\w*|dysphagia",
+    "bleeding": r"bleed\w*",
+    "headache": r"headache",
+    "nausea": r"nausea",
+    "dizziness": r"dizziness",
+    "rash": r"rash",
+}
+
+
+def symptom_concepts(text: str) -> set[str]:
+    return {
+        name
+        for name, pattern in SYMPTOM_CONCEPTS.items()
+        if re.search(r"\b(?:" + pattern + r")\b", text, re.I)
+    }
+
+
+def scoped_pieces(text: str, turn: Turn, topic: str | None, stage: str) -> list[str]:
+    """Split independent assertions only; never copy shared numeric qualifiers."""
+    if turn.speaker != "PATIENT":
+        return [text]
+    if re.search(r"\b(actually|correction|i meant|rather than)\b", text, re.I):
+        raise StageError(stage, "unsupported correction scope; clinician review required", turn.ref)
+    contrast = re.split(r"\s+but\s+", text, flags=re.I)
+    if len(contrast) > 1:
+        if all(symptom_concepts(part) for part in contrast):
+            return contrast
+        raise StageError(stage, "unsupported contrast scope", turn.ref)
+    if topic == "medication_history" and re.search(r"\s+and\s+", text, re.I):
+        if NEGATION.search(text):
+            raise StageError(stage, "unsupported shared medication negation", turn.ref)
+        parts = re.split(r"\s+and\s+", text, flags=re.I)
+        # Only bare additional medicine names are independent here. Shared doses,
+        # frequency and temporal qualifiers require a richer representation.
+        if all(re.fullmatch(r"[A-Za-z][A-Za-z-]*[.]?", p) for p in parts[1:]):
+            return parts
+        raise StageError(stage, "unsupported coordinated medication qualifiers", turn.ref)
+    return [text]
 
 
 def question_topic(text: str, previous: str | None = None) -> str | None:
@@ -114,7 +165,9 @@ def certainty(text: str) -> str:
     return "confirmed"
 
 
-def sections_for(turn: Turn, text: str, topic: str | None) -> tuple[str, ...]:
+def sections_for(
+    turn: Turn, text: str, topic: str | None, asked: set[str] | None = None
+) -> tuple[str, ...]:
     if "?" in text or ACK.fullmatch(text) or turn.speaker == "COMPANION":
         return ()
     if turn.speaker in ("DOCTOR", "NURSE"):
@@ -127,16 +180,21 @@ def sections_for(turn: Turn, text: str, topic: str | None) -> tuple[str, ...]:
         if EXAM.search(text):
             return ("examination",)
         if turn.speaker == "DOCTOR" and ASSESSMENT.search(text) and not FAMILY.search(text):
+            if re.search(r"\b(if|unless|ikiwa|endapo)\b", text, re.I):
+                return ()
             return ("assessment",)
+        if turn.speaker == "DOCTOR" and SYMPTOMS.search(text) and not FAMILY.search(text):
+            return ("history_of_presenting_illness",)
         return ()
     if FAMILY.search(text):
         return ("family_history",)
     if topic == "chief_complaint":
         return ("chief_complaint", "history_of_presenting_illness")
     if topic == "review_of_systems":
-        return (
-            ("review_of_systems",) if NEGATIVE.search(text) else ("history_of_presenting_illness",)
-        )
+        concepts = symptom_concepts(text)
+        if NEGATIVE.search(text) and concepts and concepts <= (asked or set()):
+            return ("review_of_systems",)
+        return ("history_of_presenting_illness",)
     if topic:
         return (topic,)
     if SYMPTOMS.search(text):
@@ -148,20 +206,62 @@ def evidence(transcript: str, stage: str = "extract") -> list[Evidence]:
     result = []
     context = None
     topic = None
+    asked: set[str] = set()
     for turn in parse_transcript(transcript, stage):
         for text in pieces(turn.text):
             if turn.speaker == "DOCTOR" and "?" in text:
                 new_topic = question_topic(text, topic)
                 topic = new_topic
                 context = turn
-            result.append(
-                Evidence(
-                    len(result),
-                    turn,
-                    text,
-                    sections_for(turn, text, topic),
-                    context if turn.speaker == "PATIENT" else None,
-                    bool(REJECTED.search(text)),
+                asked = symptom_concepts(text) if topic == "review_of_systems" else set()
+            for part in scoped_pieces(text, turn, topic, stage):
+                result.append(
+                    Evidence(
+                        len(result),
+                        turn,
+                        part,
+                        sections_for(turn, part, topic, asked),
+                        context if turn.speaker == "PATIENT" else None,
+                        bool(REJECTED.search(part)),
+                    )
                 )
+    # Link standalone retractions across sentence/adjacent doctor-turn boundaries.
+    for index, item in enumerate(result):
+        if item.turn.speaker != "DOCTOR" or not re.fullmatch(
+            r"(?:but no|let['’]?s not go there(?: yet)?|ruled out)[.!]?", item.text, re.I
+        ):
+            continue
+        if (
+            index
+            and result[index - 1].turn.speaker == "DOCTOR"
+            and ("assessment" in result[index - 1].sections)
+        ):
+            result[index - 1] = replace(result[index - 1], rejected=True)
+        else:
+            raise StageError(
+                stage, "rejection continuation has no unambiguous hypothesis", item.turn.ref
             )
     return result
+
+
+def require_supported(items: list[Evidence]) -> None:
+    """Do not report successful extraction after dropping an unclassified turn."""
+    unknown = []
+    for item in items:
+        if item.sections or item.turn.speaker == "COMPANION" or ACK.fullmatch(item.text):
+            continue
+        if item.turn.speaker == "DOCTOR" and (
+            "?" in item.text
+            or re.fullmatch(
+                r"(?:habari|karibu|hello|hi|welcome|good morning)[, .!]*"
+                r"(?:(?:habari|karibu|hello|welcome)[, .!]*)*",
+                item.text,
+                re.I,
+            )
+        ):
+            continue
+        unknown.append(item.turn.ref)
+    if unknown:
+        raise StageError(
+            "extract", "cannot safely classify clinical turns: " + ", ".join(sorted(set(unknown)))
+        )

@@ -69,9 +69,8 @@ def test_cache_hash_tampering_fails(cache):
         extract(TEXT, Settings(offline=True))
 
 
-@pytest.mark.parametrize("provider", ["ollama", "gemini"])
 @pytest.mark.parametrize("body", [[], None, {}, {"done": True, "message": {}}])
-def test_malformed_provider_response_fails(monkeypatch, provider, body):
+def test_malformed_provider_response_fails(monkeypatch, body):
     monkeypatch.setattr(
         httpx,
         "post",
@@ -80,11 +79,10 @@ def test_malformed_provider_response_fails(monkeypatch, provider, body):
         ),
     )
     with pytest.raises(StageError):
-        generate(Settings(provider=provider, gemini_api_key="test-key"), "prompt", {}, {})
+        generate(Settings(gemini_api_key="test-key"), "prompt", {}, {})
 
 
-@pytest.mark.parametrize("provider", ["ollama", "gemini"])
-def test_provider_failure_has_no_fallback(monkeypatch, provider):
+def test_provider_failure_has_no_fallback(monkeypatch):
     calls = []
 
     def fail(url, **kwargs):
@@ -93,7 +91,7 @@ def test_provider_failure_has_no_fallback(monkeypatch, provider):
 
     monkeypatch.setattr(httpx, "post", fail)
     with pytest.raises(StageError, match="timed out") as error:
-        generate(Settings(provider=provider, gemini_api_key="test-key"), "prompt", {}, {})
+        generate(Settings(gemini_api_key="test-key"), "prompt", {}, {})
     assert len(calls) == 1
     assert "secret" not in str(error.value)
 
@@ -128,3 +126,63 @@ def test_invalid_model_selections_fail(monkeypatch, selection):
 
 def test_offline_readiness_checks_committed_artifacts():
     assert check(Settings(offline=True)) is None
+
+
+@pytest.mark.parametrize("reason", ["MAX_TOKENS", "SAFETY", None])
+def test_incomplete_gemini_generation_rejected(monkeypatch, reason):
+    body = {"candidates": [{"finishReason": reason, "content": {"parts": [{"text": "{}"}]}}]}
+    monkeypatch.setattr(
+        httpx,
+        "post",
+        lambda *a, **k: httpx.Response(
+            200, json=body, request=httpx.Request("POST", "https://example.test")
+        ),
+    )
+    with pytest.raises(StageError, match="blocked or incomplete"):
+        generate(Settings(gemini_api_key="test-key"), "prompt", {}, {})
+
+
+def test_gemini_request_and_success_metadata(monkeypatch):
+    def respond(url, **kwargs):
+        assert "test-key" not in url
+        assert kwargs["headers"] == {"x-goog-api-key": "test-key"}
+        config = kwargs["json"]["generationConfig"]
+        assert config["temperature"] == 0
+        assert config["responseJsonSchema"] == {"type": "object"}
+        assert kwargs["timeout"] == 15
+        return httpx.Response(
+            200,
+            request=httpx.Request("POST", url),
+            json={
+                "modelVersion": "gemini-3.1-flash-lite",
+                "candidates": [{"finishReason": "STOP", "content": {"parts": [{"text": "{}"}]}}],
+            },
+        )
+
+    monkeypatch.setattr(httpx, "post", respond)
+    content, metadata = generate(
+        Settings(gemini_api_key="test-key", timeout=15), "prompt", {}, {"type": "object"}
+    )
+    assert content == "{}" and metadata["model"] == "gemini/gemini-3.1-flash-lite"
+
+
+@pytest.mark.parametrize("status", [401, 403, 429, 500])
+def test_generation_errors_do_not_expose_key(monkeypatch, status):
+    monkeypatch.setattr(
+        httpx,
+        "post",
+        lambda *a, **k: httpx.Response(
+            status,
+            json={"error": "test-key"},
+            request=httpx.Request("POST", "https://example.test"),
+        ),
+    )
+    with pytest.raises(StageError, match=f"HTTP {status}") as error:
+        generate(Settings(gemini_api_key="test-key"), "prompt", {}, {})
+    assert "test-key" not in str(error.value)
+
+
+def test_missing_generation_key_never_contacts_network(monkeypatch):
+    monkeypatch.setattr(httpx, "post", lambda *a, **k: pytest.fail("network contacted"))
+    with pytest.raises(StageError, match="GEMINI_API_KEY is missing"):
+        generate(Settings(), "prompt", {}, {})

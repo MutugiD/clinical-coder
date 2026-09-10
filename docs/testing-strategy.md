@@ -20,7 +20,7 @@ four broken-register cases in Appendix A.
 
 PR gates are Ruff, pytest, compilation, a Linux executable check, container build,
 and CodeQL. Once services exist, exercise Compose health plus actual processing.
-Before hand-in, run real Ollama extraction, independent validation, a complete
+Before hand-in, run real Gemini extraction, independent validation, a complete
 pipeline, and a fresh Linux clone using the README commands. Record observed
 results and limitations rather than predicting that checks will pass.
 
@@ -31,16 +31,15 @@ resolution with unchanged certainty, and exclusion of considered_and_rejected
 elements. A number appearing only in context_span cannot justify a value. Check
 that optional --note does not change knowledge rows or not_in_corpus.
 
-Test explicit provider selection, missing executable/server/model/key, HTTP errors,
+Test explicit provider selection, missing or invalid model/key, HTTP errors,
 malformed provider responses, and refusal to silently switch modes. Offline tests
 block all network access, rename the known transcript, mutate its contents, tamper
-with cached notes, and exercise unseen supported and unsupported cases. Run CPU-only
-benchmarks with hardware, cold/warm latency, and validation outcomes recorded.
+with cached notes, and exercise unseen supported and unsupported cases. Record live request timings, model identity, clinical coverage and validation outcomes.
 
 Tests live under src/tests; fixtures are under src/tests/fixtures. Extraction tests
 exercise provider failures, schema-limited selections, content-based replay,
 cache tampering and unsupported unseen input. Numeric and attribution tests use
-independent mutations with positive controls. Live CPU results are separate from
+independent mutations with positive controls. Live provider results are separate from
 credential-free CI and are recorded in [evaluation.md](evaluation.md).
 
 Knowledge tests use a separate synthetic guideline with different citation

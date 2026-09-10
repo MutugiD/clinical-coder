@@ -32,6 +32,25 @@ negation. Source-derived medication keys and shared negation rules now address
 both, with straight/curly-apostrophe and leading-decimal conflict regressions.
 These tests do not establish unrestricted semantic contradiction detection.
 
+## Final submission review
+
+`test_submission_gaps.py` reproduces the review defects independently: split-sentence
+and adjacent-turn rejection, opposing allergies, mixed symptom polarity, unasked ROS
+negatives, direct diagnoses, coordinated medicines and omitted model selections.
+Controls cover distinct historical periods, unrelated rejected hypotheses, explicit
+abstention on unsupported corrections/qualifiers, and CLI/HTTP rejection mutations.
+
+`test_extraction.py` and `test_grading_configuration.py` exercise the sole Gemini
+provider, including structured requests, missing credentials, HTTP failures,
+timeouts, blocked/truncated responses, completeness and credential-safe errors.
+Removed provider selection is rejected, while offline ignores live configuration.
+
+`local_rehearsal.py` is an opt-in CLI runner, separate from pytest. It checks the
+supplied, alternate and submission consultations against manually specified facts,
+expected codes, conflicts, provenance markers and canonical output hashes. Its
+live mode imports an explicitly named local environment file; credentials are
+never written to rehearsal reports. Provider validity is separate from completeness.
+
 See [evaluation](evaluation.md) for actual model measurements and
 [end-to-end testing](end-to-end-testing.md) for manual commands. Final clean-clone
 submission rehearsal and remaining writing are tracked in issue #9.

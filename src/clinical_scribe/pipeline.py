@@ -90,11 +90,7 @@ def run_pipeline(
                     settings = Settings.from_env(provider, offline=offline)
                     record["mode"] = "offline" if offline else "model"
                     if not offline:
-                        model = (
-                            settings.model
-                            if settings.provider == "ollama"
-                            else settings.gemini_model
-                        )
+                        model = settings.gemini_model
                         record["model"] = settings.provider + "/" + model
                         prompt = read_text("prompts/extract.txt", stage)
                         record["prompt_hash"] = (
