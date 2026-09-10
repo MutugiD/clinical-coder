@@ -1,4 +1,16 @@
 #!/usr/bin/env python3
+import os
+from pathlib import Path
+import sys
+
+
+ROOT = Path(__file__).resolve().parent
+VENV_PYTHON = ROOT / ".venv" / "bin" / "python"
+if VENV_PYTHON.exists() and Path(sys.executable).resolve() != VENV_PYTHON.resolve():
+    os.execv(str(VENV_PYTHON), [str(VENV_PYTHON), str(Path(__file__)), *sys.argv[1:]])
+
+sys.path.insert(0, str(ROOT / "src"))
+
 from clinical_scribe.cli import main
 
 if __name__ == "__main__":
