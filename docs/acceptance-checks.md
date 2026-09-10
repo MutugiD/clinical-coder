@@ -47,4 +47,4 @@ Removed provider selection is rejected, while offline ignores live configuration
 
 See [evaluation](evaluation.md) for actual model measurements and
 [end-to-end testing](end-to-end-testing.md) for manual commands. Final clean-clone
-submission rehearsal and remaining writing are tracked in issue #9.
+remaining submission writing is tracked in issue #9.
