@@ -12,6 +12,7 @@ from clinical_scribe.extraction import extract
 from clinical_scribe.loaders import parse_register, read_json, read_text
 from clinical_scribe.output import write_json
 from clinical_scribe.readiness import check
+from clinical_scribe.resolver import resolve
 from clinical_scribe.transcript import parse_transcript
 from clinical_scribe.validation import validate
 
@@ -60,6 +61,12 @@ def dispatch(args: argparse.Namespace) -> None:
         return
     if stage == "validate":
         validate(read_text(args.transcript, stage), read_json(args.note, stage))
+        return
+    if stage == "resolve":
+        resolved = resolve(
+            read_json(args.note, stage), read_text(args.register, stage), args.register
+        )
+        write_json(args.out, resolved, stage)
         return
     if hasattr(args, "transcript"):
         parse_transcript(read_text(args.transcript, stage), stage)
