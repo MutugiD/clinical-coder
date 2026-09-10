@@ -61,6 +61,28 @@ fails with an explanation. Every returned note is validated.
 `.env.example` documents settings. Export them in the shell; the application does
 not load `.env` automatically. `--offline` cannot be combined with `--provider`.
 
+## Resolve codes
+
+```sh
+./scribe resolve --note results/note.json --register register.csv --out results/resolved.json
+```
+
+Validate the note against its transcript before resolution. The resolver accepts
+only the note and register, so it cannot establish source provenance itself. It
+uses no model or network. A unique exact name or synonym within the allowed kind
+resolves; near matches remain uncoded suggestions and competing exact matches are
+ambiguous. Conflict, rejected, companion, family-history and negated elements stay
+uncoded. Certainty and evidence remain unchanged. Resolution confidence describes
+the lookup; the original confidence is retained as `extraction_confidence`.
+
+For 12,000 conditions and 3,000 drugs, compile each versioned register into a
+kind-partitioned alias index and token trie. Retrieve exact candidates first, then
+bounded character-gram candidates for suggestions, using fixed thresholds and
+stable code ordering. Version normalization and contextual aliases with the
+register checksum; record selected aliases, alternatives and rule versions so each
+decision can be reproduced. Review synonym changes against a frozen evaluation
+set before releasing a new catalogue.
+
 ## Verification
 
 ```sh

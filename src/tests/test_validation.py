@@ -34,6 +34,9 @@ def test_alternate_transcript_roles_and_certainty():
         ("Start medicine 20 milligrams for four weeks.", "Start medicine 20 ml for four weeks."),
         ("Start medicine 20 milligrams for four weeks.", "Start medicine 4 mg for 20 weeks."),
         ("Temperature is -1.", "Temperature is 1."),
+        ("Start medicine .5 mg.", "Start medicine 5 mg."),
+        ("Start medicine 5% solution.", "Start medicine 5 solution."),
+        ("Temperature is <38.", "Temperature is >38."),
     ],
 )
 def test_changed_numbers_and_units_rejected(source, value):

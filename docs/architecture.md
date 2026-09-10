@@ -137,6 +137,30 @@ evidence and return code, code_system, matching confidence, alternatives, and st
 Keep extraction confidence separately where needed. Matching scores are explainable
 lookup evidence rather than calibrated clinical probabilities.
 
+The implemented `register-match-v1` uses Unicode NFKC, case folding and word-token
+boundaries. Full alias token sequences match inside an element; punctuation such
+as the period in `H. pylori` does not affect lookup. It never uses substring matches
+inside a word as exact evidence. Register order cannot break a tie: multiple exact
+codes return `ambiguous`, with stable alternatives sorted by score then code.
+
+For near matches, compare same-length token windows with `SequenceMatcher`, with
+autojunk disabled. Aliases shorter than five characters are excluded from fuzzy
+suggestions. Scores at least 0.8 appear among at most five alternatives; no fuzzy
+score authorizes a code. An exact match scores 1.0. These are matching scores,
+not probabilities. Unsupported sections and excluded contexts produce no code.
+
+One versioned contextual expansion permits `appendix` only in surgical history,
+and only for a register procedure named or aliased appendicectomy, appendectomy,
+or appendix removal. The code always comes from that register row. Multiple
+eligible procedure codes remain ambiguous. Family-history language is excluded
+even if the supplied note incorrectly puts it under assessment.
+
+The CLI validates the register before lookup, including when every note section is
+`NOT_STATED`. The result preserves original evidence and certainty, adds
+`extraction_confidence`, and identifies `resolver_version` and the resolution
+reason. Direct resolution has no transcript input; source validation is a preceding
+boundary, not something register matching can replace.
+
 ## Knowledge boundary
 
 The request contains source text and optional note. Parse citation metadata and

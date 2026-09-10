@@ -1,0 +1,420 @@
+{
+  "chief_complaint": [
+    {
+      "value": "Nimekuwa na tumbo kuuma for about three weeks, hapa juu, kama kuwaka.",
+      "span": {
+        "ref": "[00:04]",
+        "text": "Nimekuwa na tumbo kuuma for about three weeks, hapa juu, kama kuwaka."
+      },
+      "confidence": 0.0,
+      "attribution": "patient",
+      "context_span": {
+        "ref": "[00:00]",
+        "text": "Habari, karibu. What brings you in today?"
+      },
+      "extraction_confidence": 1.0,
+      "code": null,
+      "code_system": "",
+      "alternatives": [],
+      "status": "unresolved",
+      "resolver_version": "register-match-v1",
+      "resolution_reason": "no exact register match"
+    }
+  ],
+  "history_of_presenting_illness": [
+    {
+      "value": "Usiku sana.",
+      "span": {
+        "ref": "[00:15]",
+        "text": "Usiku sana."
+      },
+      "confidence": 0.0,
+      "attribution": "patient",
+      "context_span": {
+        "ref": "[00:11]",
+        "text": "Burning pain in the upper abdomen. Is it worse after eating or at night?"
+      },
+      "extraction_confidence": 1.0,
+      "code": null,
+      "code_system": "",
+      "alternatives": [],
+      "status": "unresolved",
+      "resolver_version": "register-match-v1",
+      "resolution_reason": "no exact register match"
+    },
+    {
+      "value": "And after tea in the morning.",
+      "span": {
+        "ref": "[00:15]",
+        "text": "And after tea in the morning."
+      },
+      "confidence": 0.0,
+      "attribution": "patient",
+      "context_span": {
+        "ref": "[00:11]",
+        "text": "Burning pain in the upper abdomen. Is it worse after eating or at night?"
+      },
+      "extraction_confidence": 1.0,
+      "code": null,
+      "code_system": "",
+      "alternatives": [],
+      "status": "unresolved",
+      "resolver_version": "register-match-v1",
+      "resolution_reason": "no exact register match"
+    }
+  ],
+  "review_of_systems": [
+    {
+      "value": "No vomiting.",
+      "span": {
+        "ref": "[00:22]",
+        "text": "No vomiting."
+      },
+      "confidence": 0.0,
+      "attribution": "patient",
+      "context_span": {
+        "ref": "[00:19]",
+        "text": "Any vomiting, black stool, weight loss?"
+      },
+      "extraction_confidence": 1.0,
+      "code": null,
+      "code_system": "",
+      "alternatives": [],
+      "status": "unresolved",
+      "resolver_version": "register-match-v1",
+      "resolution_reason": "excluded by attribution, conflict, rejection or polarity"
+    },
+    {
+      "value": "Stool is normal.",
+      "span": {
+        "ref": "[00:22]",
+        "text": "Stool is normal."
+      },
+      "confidence": 0.0,
+      "attribution": "patient",
+      "context_span": {
+        "ref": "[00:19]",
+        "text": "Any vomiting, black stool, weight loss?"
+      },
+      "extraction_confidence": 1.0,
+      "code": null,
+      "code_system": "",
+      "alternatives": [],
+      "status": "unresolved",
+      "resolver_version": "register-match-v1",
+      "resolution_reason": "no exact register match"
+    },
+    {
+      "value": "Weight ni sawa.",
+      "span": {
+        "ref": "[00:22]",
+        "text": "Weight ni sawa."
+      },
+      "confidence": 0.0,
+      "attribution": "patient",
+      "context_span": {
+        "ref": "[00:19]",
+        "text": "Any vomiting, black stool, weight loss?"
+      },
+      "extraction_confidence": 1.0,
+      "code": null,
+      "code_system": "",
+      "alternatives": [],
+      "status": "unresolved",
+      "resolver_version": "register-match-v1",
+      "resolution_reason": "no exact register match"
+    }
+  ],
+  "past_medical_history": "NOT_STATED",
+  "past_surgical_history": [
+    {
+      "value": "Appendix, 2019, at the county hospital.",
+      "span": {
+        "ref": "[00:46]",
+        "text": "Appendix, 2019, at the county hospital."
+      },
+      "confidence": 1.0,
+      "attribution": "patient",
+      "context_span": {
+        "ref": "[00:44]",
+        "text": "Any surgeries before?"
+      },
+      "extraction_confidence": 1.0,
+      "code": "PGP-EC-0330",
+      "code_system": "EC",
+      "alternatives": [],
+      "status": "resolved",
+      "resolver_version": "register-match-v1",
+      "resolution_reason": "unique exact alias"
+    }
+  ],
+  "medication_history": [
+    {
+      "value": "Diclofenac for my knee, one tablet mara mbili kwa siku, for about a month now.",
+      "span": {
+        "ref": "[00:29]",
+        "text": "Diclofenac for my knee, one tablet mara mbili kwa siku, for about a month now."
+      },
+      "confidence": 1.0,
+      "attribution": "patient",
+      "context_span": {
+        "ref": "[00:27]",
+        "text": "Are you taking any medicines?"
+      },
+      "extraction_confidence": 1.0,
+      "code": "M01AB05",
+      "code_system": "ATC",
+      "alternatives": [],
+      "status": "resolved",
+      "resolver_version": "register-match-v1",
+      "resolution_reason": "unique exact alias"
+    },
+    {
+      "value": "Na Panadol sometimes.",
+      "span": {
+        "ref": "[00:29]",
+        "text": "Na Panadol sometimes."
+      },
+      "confidence": 1.0,
+      "attribution": "patient",
+      "context_span": {
+        "ref": "[00:27]",
+        "text": "Are you taking any medicines?"
+      },
+      "extraction_confidence": 1.0,
+      "code": "N02BE01",
+      "code_system": "ATC",
+      "alternatives": [],
+      "status": "resolved",
+      "resolver_version": "register-match-v1",
+      "resolution_reason": "unique exact alias"
+    }
+  ],
+  "allergies": [
+    {
+      "value": "Penicillin.",
+      "span": {
+        "ref": "[00:40]",
+        "text": "Penicillin."
+      },
+      "confidence": 1.0,
+      "attribution": "patient",
+      "context_span": {
+        "ref": "[00:38]",
+        "text": "Any known allergies?"
+      },
+      "extraction_confidence": 1.0,
+      "code": "ALG-EC-0003",
+      "code_system": "EC",
+      "alternatives": [],
+      "status": "resolved",
+      "resolver_version": "register-match-v1",
+      "resolution_reason": "unique exact alias"
+    },
+    {
+      "value": "Nilipata rash last year.",
+      "span": {
+        "ref": "[00:40]",
+        "text": "Nilipata rash last year."
+      },
+      "confidence": 0.0,
+      "attribution": "patient",
+      "context_span": {
+        "ref": "[00:38]",
+        "text": "Any known allergies?"
+      },
+      "extraction_confidence": 1.0,
+      "code": null,
+      "code_system": "",
+      "alternatives": [],
+      "status": "unresolved",
+      "resolver_version": "register-match-v1",
+      "resolution_reason": "no exact register match"
+    }
+  ],
+  "family_history": [
+    {
+      "value": "My father alikuwa na ulcers.",
+      "span": {
+        "ref": "[00:53]",
+        "text": "My father alikuwa na ulcers."
+      },
+      "confidence": 0.0,
+      "attribution": "patient",
+      "context_span": {
+        "ref": "[00:50]",
+        "text": "Anyone in the family with stomach problems or ulcers?"
+      },
+      "extraction_confidence": 1.0,
+      "code": null,
+      "code_system": "",
+      "alternatives": [],
+      "status": "unresolved",
+      "resolver_version": "register-match-v1",
+      "resolution_reason": "excluded by attribution, conflict, rejection or polarity"
+    }
+  ],
+  "social_history": [
+    {
+      "value": "I do not smoke.",
+      "span": {
+        "ref": "[00:59]",
+        "text": "I do not smoke."
+      },
+      "confidence": 0.0,
+      "attribution": "patient",
+      "context_span": {
+        "ref": "[00:57]",
+        "text": "Do you smoke or drink?"
+      },
+      "extraction_confidence": 1.0,
+      "code": null,
+      "code_system": "",
+      "alternatives": [],
+      "status": "unresolved",
+      "resolver_version": "register-match-v1",
+      "resolution_reason": "excluded by attribution, conflict, rejection or polarity"
+    },
+    {
+      "value": "Pombe kidogo, weekends.",
+      "span": {
+        "ref": "[00:59]",
+        "text": "Pombe kidogo, weekends."
+      },
+      "confidence": 0.0,
+      "attribution": "patient",
+      "context_span": {
+        "ref": "[00:57]",
+        "text": "Do you smoke or drink?"
+      },
+      "extraction_confidence": 1.0,
+      "code": null,
+      "code_system": "",
+      "alternatives": [],
+      "status": "unresolved",
+      "resolver_version": "register-match-v1",
+      "resolution_reason": "no exact register match"
+    }
+  ],
+  "vitals": [
+    {
+      "value": "BP is 128 over 82, pulse 76, temperature 36.8.",
+      "span": {
+        "ref": "[01:03]",
+        "text": "BP is 128 over 82, pulse 76, temperature 36.8."
+      },
+      "confidence": 0.0,
+      "attribution": "doctor",
+      "extraction_confidence": 1.0,
+      "code": null,
+      "code_system": "",
+      "alternatives": [],
+      "status": "unresolved",
+      "resolver_version": "register-match-v1",
+      "resolution_reason": "no exact register match"
+    }
+  ],
+  "examination": [
+    {
+      "value": "Abdomen is soft, mild epigastric tenderness, no guarding.",
+      "span": {
+        "ref": "[01:03]",
+        "text": "Abdomen is soft, mild epigastric tenderness, no guarding."
+      },
+      "confidence": 0.0,
+      "attribution": "doctor",
+      "extraction_confidence": 1.0,
+      "code": null,
+      "code_system": "",
+      "alternatives": [],
+      "status": "unresolved",
+      "resolver_version": "register-match-v1",
+      "resolution_reason": "excluded by attribution, conflict, rejection or polarity"
+    }
+  ],
+  "assessment": [
+    {
+      "value": "I think this is most likely gastritis related to the diclofenac.",
+      "span": {
+        "ref": "[01:14]",
+        "text": "I think this is most likely gastritis related to the diclofenac."
+      },
+      "confidence": 1.0,
+      "attribution": "doctor",
+      "certainty": "probable",
+      "extraction_confidence": 1.0,
+      "code": "K29.7",
+      "code_system": "ICD-10",
+      "alternatives": [],
+      "status": "resolved",
+      "resolver_version": "register-match-v1",
+      "resolution_reason": "unique exact alias"
+    }
+  ],
+  "plan": [
+    {
+      "value": "We will stop the diclofenac",
+      "span": {
+        "ref": "[01:14]",
+        "text": "We will stop the diclofenac"
+      },
+      "confidence": 1.0,
+      "attribution": "doctor",
+      "extraction_confidence": 1.0,
+      "code": "M01AB05",
+      "code_system": "ATC",
+      "alternatives": [],
+      "status": "resolved",
+      "resolver_version": "register-match-v1",
+      "resolution_reason": "unique exact alias"
+    },
+    {
+      "value": "start omeprazole 20 milligrams once daily for four weeks",
+      "span": {
+        "ref": "[01:14]",
+        "text": "start omeprazole 20 milligrams once daily for four weeks"
+      },
+      "confidence": 1.0,
+      "attribution": "doctor",
+      "extraction_confidence": 1.0,
+      "code": "A02BC01",
+      "code_system": "ATC",
+      "alternatives": [],
+      "status": "resolved",
+      "resolver_version": "register-match-v1",
+      "resolution_reason": "unique exact alias"
+    },
+    {
+      "value": "check an H. pylori stool antigen.",
+      "span": {
+        "ref": "[01:14]",
+        "text": "check an H. pylori stool antigen."
+      },
+      "confidence": 1.0,
+      "attribution": "doctor",
+      "extraction_confidence": 1.0,
+      "code": "LAB-EC-0412",
+      "code_system": "EC",
+      "alternatives": [],
+      "status": "resolved",
+      "resolver_version": "register-match-v1",
+      "resolution_reason": "unique exact alias"
+    },
+    {
+      "value": "Come back in two weeks, sooner if you vomit blood or the pain becomes severe.",
+      "span": {
+        "ref": "[01:14]",
+        "text": "Come back in two weeks, sooner if you vomit blood or the pain becomes severe."
+      },
+      "confidence": 0.0,
+      "attribution": "doctor",
+      "extraction_confidence": 1.0,
+      "code": null,
+      "code_system": "",
+      "alternatives": [],
+      "status": "unresolved",
+      "resolver_version": "register-match-v1",
+      "resolution_reason": "excluded by attribution, conflict, rejection or polarity"
+    }
+  ]
+}
