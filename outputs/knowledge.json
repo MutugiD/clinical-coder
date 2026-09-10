@@ -1,0 +1,141 @@
+{
+  "rows": [
+    {
+      "type": "drug_class_rule",
+      "fields": {
+        "condition_or_exposure": "Patients presenting with epigastric burning pain who are taking a non-steroidal anti-inflammatory drug (NSAID)",
+        "action": "have the NSAID stopped where possible",
+        "severity": "recommendation"
+      },
+      "source": "Synthetic Gastroenterology Guideline",
+      "section": "4.2",
+      "page": 17,
+      "quote": "Patients presenting with epigastric burning pain who are taking a non-steroidal anti-inflammatory drug (NSAID) should have the NSAID stopped where possible."
+    },
+    {
+      "type": "drug_class_rule",
+      "fields": {
+        "condition_or_exposure": "Dyspepsia and NSAID-associated gastritis",
+        "treatment": "A proton pump inhibitor (PPI)",
+        "dose": "standard dose",
+        "duration": "four to eight weeks",
+        "action": "A proton pump inhibitor (PPI) at standard dose for four to eight weeks is recommended.",
+        "severity": "recommendation"
+      },
+      "source": "Synthetic Gastroenterology Guideline",
+      "section": "4.2",
+      "page": 17,
+      "quote": "A proton pump inhibitor (PPI) at standard dose for four to eight weeks is recommended."
+    },
+    {
+      "type": "test_constraint",
+      "fields": {
+        "target": "Helicobacter pylori",
+        "test": "stool antigen test",
+        "constraint": "the patient should not have taken a PPI in the preceding two weeks",
+        "exposure": "PPI",
+        "lookback_interval": "two weeks",
+        "reason": "this reduces test sensitivity"
+      },
+      "source": "Synthetic Gastroenterology Guideline",
+      "section": "4.2",
+      "page": 17,
+      "quote": "Test for Helicobacter pylori using a stool antigen test; the patient should not have taken a PPI in the preceding two weeks as this reduces test sensitivity."
+    },
+    {
+      "type": "red_flag",
+      "fields": {
+        "condition": "Dyspepsia and NSAID-associated gastritis",
+        "feature": "haematemesis",
+        "action": "urgent referral",
+        "severity": "urgent"
+      },
+      "source": "Synthetic Gastroenterology Guideline",
+      "section": "4.2",
+      "page": 17,
+      "quote": "Alarm features requiring urgent referral: haematemesis, melaena, unintentional weight loss, persistent vomiting, dysphagia, age over 55 with new-onset symptoms."
+    },
+    {
+      "type": "red_flag",
+      "fields": {
+        "condition": "Dyspepsia and NSAID-associated gastritis",
+        "feature": "melaena",
+        "action": "urgent referral",
+        "severity": "urgent"
+      },
+      "source": "Synthetic Gastroenterology Guideline",
+      "section": "4.2",
+      "page": 17,
+      "quote": "Alarm features requiring urgent referral: haematemesis, melaena, unintentional weight loss, persistent vomiting, dysphagia, age over 55 with new-onset symptoms."
+    },
+    {
+      "type": "red_flag",
+      "fields": {
+        "condition": "Dyspepsia and NSAID-associated gastritis",
+        "feature": "unintentional weight loss",
+        "action": "urgent referral",
+        "severity": "urgent"
+      },
+      "source": "Synthetic Gastroenterology Guideline",
+      "section": "4.2",
+      "page": 17,
+      "quote": "Alarm features requiring urgent referral: haematemesis, melaena, unintentional weight loss, persistent vomiting, dysphagia, age over 55 with new-onset symptoms."
+    },
+    {
+      "type": "red_flag",
+      "fields": {
+        "condition": "Dyspepsia and NSAID-associated gastritis",
+        "feature": "persistent vomiting",
+        "action": "urgent referral",
+        "severity": "urgent"
+      },
+      "source": "Synthetic Gastroenterology Guideline",
+      "section": "4.2",
+      "page": 17,
+      "quote": "Alarm features requiring urgent referral: haematemesis, melaena, unintentional weight loss, persistent vomiting, dysphagia, age over 55 with new-onset symptoms."
+    },
+    {
+      "type": "red_flag",
+      "fields": {
+        "condition": "Dyspepsia and NSAID-associated gastritis",
+        "feature": "dysphagia",
+        "action": "urgent referral",
+        "severity": "urgent"
+      },
+      "source": "Synthetic Gastroenterology Guideline",
+      "section": "4.2",
+      "page": 17,
+      "quote": "Alarm features requiring urgent referral: haematemesis, melaena, unintentional weight loss, persistent vomiting, dysphagia, age over 55 with new-onset symptoms."
+    },
+    {
+      "type": "red_flag",
+      "fields": {
+        "condition": "Dyspepsia and NSAID-associated gastritis",
+        "feature": "age over 55 with new-onset symptoms",
+        "action": "urgent referral",
+        "severity": "urgent"
+      },
+      "source": "Synthetic Gastroenterology Guideline",
+      "section": "4.2",
+      "page": 17,
+      "quote": "Alarm features requiring urgent referral: haematemesis, melaena, unintentional weight loss, persistent vomiting, dysphagia, age over 55 with new-onset symptoms."
+    },
+    {
+      "type": "drug_class_rule",
+      "fields": {
+        "condition_or_exposure": "Patients who require ongoing NSAID therapy",
+        "action": "receive PPI co-prescription for gastroprotection",
+        "severity": "recommendation"
+      },
+      "source": "Synthetic Gastroenterology Guideline",
+      "section": "4.2",
+      "page": 17,
+      "quote": "Patients who require ongoing NSAID therapy should receive PPI co-prescription for gastroprotection."
+    }
+  ],
+  "not_in_corpus": [
+    "The excerpt does not specify a PPI dose in milligrams.",
+    "The excerpt does not specify treatment for patients under 18."
+  ],
+  "prose": "Confirm the medicine's class before applying the cited exposure and treatment rules; review whether their conditions hold. The plan mentions a stool-antigen test. Ask about prior exposure to the cited medicine class and review test and treatment timing against the lookback interval. Assess the listed alarm features and confirm age where relevant; an undocumented finding is not a negative response. Ask the clinician to resolve the listed corpus gaps; the excerpt cannot supply missing dose or age-specific guidance. Do not infer drug-class membership, invent patient facts, upgrade diagnostic certainty, or change prescriptions and orders automatically."
+}

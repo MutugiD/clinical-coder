@@ -29,3 +29,18 @@ unfamiliar expressions, implicit corrections and longer conversations require
 additional evaluation and clinician review. Direct Gemini generation has not
 been tested live because no provider key is configured. Controlled provider
 tests are reported separately from the live local runs.
+
+## Deterministic knowledge checks
+
+The supplied excerpt produces three drug-class rules, six red-flag rows and one
+test constraint. Every quotation is a verbatim substring and its source, section
+and page match the citation header. The committed consultation-informed prose has
+95 words. Running the required source-only command produces identical rows and
+corpus gaps, with conditional prose.
+
+The independent guideline fixture changes the source title, section, page,
+treatment duration, lookback interval and alarm list. Tests cover citation and
+field tampering, omitted/duplicate rules, source-only invariance, dose and age
+guidance gaps, unsupported formats and network isolation. The parser intentionally
+fails on unsupported sentence structures; these results do not establish coverage
+of arbitrary clinical guidelines or multi-section documents.

@@ -42,3 +42,11 @@ exercise provider failures, schema-limited selections, content-based replay,
 cache tampering and unsupported unseen input. Numeric and attribution tests use
 independent mutations with positive controls. Live CPU results are separate from
 credential-free CI and are recorded in [evaluation.md](evaluation.md).
+
+Knowledge tests use a separate synthetic guideline with different citation
+metadata, duration and alarm features. They verify source-only operation, optional
+note invariance, number/unit preservation, and changes to corpus gaps when source
+treatment guidance changes. Mutations alter quotes, page/section/source metadata,
+structured fields, row completeness and prose length. A fresh interpreter blocks
+network access and verifies that no provider module is imported. CLI failure tests
+ensure a bad source leaves a previous successful artifact untouched.

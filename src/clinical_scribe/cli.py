@@ -9,6 +9,7 @@ from clinical_scribe.config import Settings
 from clinical_scribe.contracts import enforce
 from clinical_scribe.errors import StageError
 from clinical_scribe.extraction import extract
+from clinical_scribe.knowledge import knowledge
 from clinical_scribe.loaders import parse_register, read_json, read_text
 from clinical_scribe.output import write_json
 from clinical_scribe.readiness import check
@@ -67,6 +68,17 @@ def dispatch(args: argparse.Namespace) -> None:
             read_json(args.note, stage), read_text(args.register, stage), args.register
         )
         write_json(args.out, resolved, stage)
+        return
+    if stage == "knowledge":
+        note = read_json(args.note, stage) if args.note else None
+        source = read_text(args.source, stage)
+        try:
+            result = knowledge(source, note)
+        except StageError as exc:
+            if exc.source == "input":
+                raise StageError(stage, exc.message, args.source) from exc
+            raise
+        write_json(args.out, result, stage)
         return
     if hasattr(args, "transcript"):
         parse_transcript(read_text(args.transcript, stage), stage)
