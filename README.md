@@ -27,6 +27,28 @@ python -m pip install --no-deps --no-build-isolation -e .
 Readiness checks Gemini model access; generation is verified by running extraction.
 On Windows, activate `.venv/Scripts/Activate.ps1` and use `python scribe`.
 
+## Time, scope and next steps
+
+I spent approximately 12 to 13 hours on this submission. I concentrated that time
+on source-grounded extraction, strict validation, deterministic resolution,
+guideline citations, failure handling, service boundaries and repeatable tests.
+
+I cut transcription because it is not required for this track. I also kept the
+offline extractor and guideline parser deliberately narrow. They handle the
+supplied formats and tested variations, but they are not general Swahili or Sheng
+language systems and they do not attempt to resolve unclear chronology. I did not
+build a production deployment, a user interface, automated clinical terminology
+updates or a clinical review workflow. Those additions would have reduced the time
+available for the safety checks that determine whether an output can be trusted.
+
+With two additional days, I would first repeat the documented setup and full test
+matrix on a clean CPU-only machine. I would then add more clinician-labelled
+consultations covering Sheng, indirect answers, corrections, companions and noisy
+speaker labels. I would expand mutation tests around dates, doses and attribution,
+run load tests across the four services, and capture latency, failure and unresolved
+rate dashboards. I would finish by reviewing the new failures with a clinician and
+turning only the agreed cases into versioned extraction or resolver rules.
+
 ## Extract and validate
 
 ```sh
@@ -170,3 +192,33 @@ facts. Implementation coverage and defects are tracked in GitHub Issues.
   semantic contradiction solver.
 - **Provider omissions or slow inference:** a grounded note may be incomplete or
   time out. Evaluate coverage separately from validity and record CPU latency.
+
+## Part E: Leading the build
+
+I would own the contracts, validator, deterministic resolver, pipeline and release
+criteria. The mid-level ML engineer would own extraction experiments, prompt
+changes and evidence coverage evaluation. The speech engineer would own audio
+ingestion, diarisation, timestamps and speaker-role quality, while emitting the
+same transcript contract used here.
+
+I would fix the transcript format, note schema, evidence rules, service request and
+response schemas, and audit record before splitting the work. I would not let the
+team start separate model or service implementations until we had shared fixtures
+and executable contract tests. Otherwise each component could look correct alone
+while disagreeing about speakers, spans, missing values or failure states.
+
+The first dataset would contain consented or synthetic Kenyan consultations labelled
+for section, exact evidence span, speaker, certainty, negation and rejection. Two
+clinicians would label it independently and adjudicate disagreements. The second
+would be a safety set made from controlled mutations of valid notes, including
+numbers, attribution, codes and misplaced family history. An engineer would produce
+the mutations and a clinician would confirm whether each expected rejection is
+clinically correct. The third would cover register and guideline grounding. A
+clinical coder would label exact codes, ambiguity and unresolved cases, while a
+clinician or pharmacist would verify guideline rows and citations.
+
+I would push back on judging broad language robustness from one visible transcript
+and one hidden transcript. I would keep the hidden set, but add a small labelled
+development set with representative English, Swahili and Sheng patterns. That gives
+the team a fair way to improve coverage without learning the final test cases and
+makes failures easier to diagnose than a single aggregate score.
