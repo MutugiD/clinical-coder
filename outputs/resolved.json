@@ -23,6 +23,42 @@
   ],
   "history_of_presenting_illness": [
     {
+      "value": "Nimekuwa na tumbo kuuma for about three weeks, hapa juu, kama kuwaka.",
+      "span": {
+        "ref": "[00:04]",
+        "text": "Nimekuwa na tumbo kuuma for about three weeks, hapa juu, kama kuwaka."
+      },
+      "confidence": 0.0,
+      "attribution": "patient",
+      "context_span": {
+        "ref": "[00:00]",
+        "text": "Habari, karibu. What brings you in today?"
+      },
+      "extraction_confidence": 1.0,
+      "code": null,
+      "code_system": "",
+      "alternatives": [],
+      "status": "unresolved",
+      "resolver_version": "register-match-v1",
+      "resolution_reason": "no exact register match"
+    },
+    {
+      "value": "Burning pain in the upper abdomen.",
+      "span": {
+        "ref": "[00:11]",
+        "text": "Burning pain in the upper abdomen."
+      },
+      "confidence": 0.0,
+      "attribution": "doctor",
+      "extraction_confidence": 1.0,
+      "code": null,
+      "code_system": "",
+      "alternatives": [],
+      "status": "unresolved",
+      "resolver_version": "register-match-v1",
+      "resolution_reason": "no exact register match"
+    },
+    {
       "value": "Usiku sana.",
       "span": {
         "ref": "[00:15]",

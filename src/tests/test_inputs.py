@@ -115,10 +115,10 @@ def test_required_shape_and_confidence():
 
 
 def test_config_is_explicit(monkeypatch):
-    monkeypatch.setenv("OLLAMA_MODEL", "chosen-model")
-    monkeypatch.setenv("OLLAMA_TIMEOUT_SECONDS", "15")
-    assert Settings.from_env().model == "chosen-model"
-    monkeypatch.setenv("OLLAMA_TIMEOUT_SECONDS", "-1")
+    monkeypatch.setenv("GEMINI_MODEL", "chosen-model")
+    monkeypatch.setenv("GEMINI_TIMEOUT_SECONDS", "15")
+    assert Settings.from_env().gemini_model == "chosen-model"
+    monkeypatch.setenv("GEMINI_TIMEOUT_SECONDS", "-1")
     with pytest.raises(StageError, match="configuration"):
         Settings.from_env()
 

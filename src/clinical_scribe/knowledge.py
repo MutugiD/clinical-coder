@@ -190,10 +190,20 @@ def review_prose(rows: list[dict], gaps: list[str], note: dict | None) -> str:
         if isinstance(plan, list) and any(
             "stool antigen" in entry["value"].casefold() for entry in plan
         ):
+            constraint = next(row for row in rows if row["type"] == "test_constraint")
             parts.append(
                 "The plan mentions a stool-antigen test. Ask about prior exposure to the cited "
-                "medicine class and review test and treatment timing against the lookback interval."
+                "medicine class and clarify planned treatment/test timing: the cited constraint "
+                f"requires no {constraint['fields']['exposure']} in the preceding "
+                f"{constraint['fields']['lookback_interval']}."
             )
+            if any("PPI dose in milligrams" in gap for gap in gaps) and any(
+                re.search(r"\bstart\b", entry["value"], re.I) for entry in plan
+            ):
+                parts.append(
+                    "The prescription is the doctor's stated plan; the excerpt does not "
+                    "independently validate its milligram dose. Do not invent a test date."
+                )
         else:
             parts.append(
                 "If ordering the cited test, check prior exposure and the specified lookback "

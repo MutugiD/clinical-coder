@@ -20,7 +20,7 @@ pydantic_core==2.46.5
 Pygments==2.21.0
 pytest==9.1.1
 referencing==0.37.0
-rpds-py==2026.6.3
+rpds-py==0.30.0
 ruff==0.16.6
 setuptools==84.0.0
 starlette==1.6.0

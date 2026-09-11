@@ -107,7 +107,7 @@ below 200 words.
 
 ### F8 Execution modes
 
-Provide CPU-compatible local Ollama, explicitly selected Gemini using an environment
+Provide Gemini as the sole live provider using an environment
 key, and offline execution. Readiness identifies missing dependencies, models,
 credentials, and artifacts. Provider failures never silently select another mode.
 
@@ -138,7 +138,7 @@ Unexpected failures remain visible and return nonzero.
 ## Quality and acceptance
 
 Deterministic stages are reproducible for identical inputs and rule versions.
-Validation is independent of provider availability. CPU execution has bounded
+Validation is independent of provider availability. Provider execution has bounded
 timeouts and measured latency. Configuration, schemas, and prompts are explicit.
 Rule releases do not silently rewrite historical decisions.
 

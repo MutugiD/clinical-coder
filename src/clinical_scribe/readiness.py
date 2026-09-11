@@ -1,7 +1,6 @@
 """Check selected dependencies and report unfinished execution paths explicitly."""
 
 import hashlib
-import shutil
 from pathlib import Path
 
 import httpx
@@ -11,31 +10,6 @@ from clinical_scribe.contracts import enforce, schema_registry
 from clinical_scribe.errors import StageError
 from clinical_scribe.loaders import read_json
 from clinical_scribe.output import canonical_bytes
-
-
-def check_ollama(settings: Settings) -> None:
-    if settings.base_url.host in {"localhost", "127.0.0.1", "::1", "[::1]"}:
-        if shutil.which("ollama") is None:
-            raise StageError(
-                "check", "Ollama executable missing; install Ollama and add it to PATH"
-            )
-    try:
-        response = httpx.get(settings.endpoint("/api/tags"), timeout=10)
-        response.raise_for_status()
-        models = response.json()["models"]
-    except (httpx.HTTPError, ValueError, KeyError, TypeError) as exc:
-        raise StageError(
-            "check",
-            "Ollama unavailable or invalid model listing; start `ollama serve` "
-            "or check OLLAMA_BASE_URL",
-            "Ollama",
-        ) from exc
-    if not isinstance(models, list) or any(not isinstance(m, dict) for m in models):
-        raise StageError("check", "invalid model listing", "Ollama")
-    if not any(m.get("name") == settings.model for m in models):
-        raise StageError(
-            "check", f"configured model is not installed; run `ollama pull {settings.model}`"
-        )
 
 
 def check_gemini(settings: Settings) -> None:
@@ -83,7 +57,4 @@ def check(settings: Settings | None = None) -> None:
         if "sha256:" + hashlib.sha256(canonical_bytes(note)).hexdigest() != manifest["note_hash"]:
             raise StageError("check", "offline note hash mismatch")
         return
-    if settings.provider == "gemini":
-        check_gemini(settings)
-    else:
-        check_ollama(settings)
+    check_gemini(settings)

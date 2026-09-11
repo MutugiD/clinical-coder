@@ -10,7 +10,7 @@ from clinical_scribe.config import Settings
 from clinical_scribe.conflicts import conflict_groups
 from clinical_scribe.contracts import empty_note, enforce
 from clinical_scribe.errors import StageError
-from clinical_scribe.evidence import ACK, Evidence, certainty, evidence
+from clinical_scribe.evidence import Evidence, certainty, evidence, require_supported
 from clinical_scribe.loaders import parse_json, read_json
 from clinical_scribe.output import canonical_bytes
 from clinical_scribe.validation import reject_codes, validate
@@ -58,16 +58,19 @@ def render(items: list[Evidence], selections: list[dict]) -> dict:
     return note
 
 
+def require_complete(items: list[Evidence], selections: list[dict]) -> None:
+    expected = {e.index: set(e.sections) for e in items if e.sections}
+    selected = {s["id"]: set(s["sections"]) for s in selections}
+    missing = sorted(set(expected) - set(selected))
+    if missing:
+        raise StageError("extract", f"provider omitted required evidence IDs: {missing}")
+    if selected != expected:
+        raise StageError("extract", "provider selections must include all required sections")
+
+
 def offline_rules(transcript: str) -> dict:
     items = evidence(transcript)
-    unknown = [
-        e
-        for e in items
-        if e.turn.speaker == "PATIENT" and not e.sections and not ACK.fullmatch(e.text)
-    ]
-    if unknown:
-        refs = ", ".join(sorted({e.turn.ref for e in unknown}))
-        raise StageError("extract", f"offline rules cannot safely classify patient turns: {refs}")
+    require_supported(items)
     selections = [{"id": e.index, "sections": list(e.sections)} for e in items if e.sections]
     if not selections:
         raise StageError("extract", "no supported clinical facts; offline extraction abstained")
@@ -105,6 +108,7 @@ def extract(transcript: str, settings: Settings) -> tuple[dict, dict]:
         from clinical_scribe.providers import generate
 
         items = evidence(transcript)
+        require_supported(items)
         candidates = [
             {
                 "id": e.index,
@@ -150,6 +154,7 @@ def extract(transcript: str, settings: Settings) -> tuple[dict, dict]:
         reject_codes(selection, "extract")
         if not Draft202012Validator(schema).is_valid(selection):
             raise StageError("extract", "provider selection violates its schema")
+        require_complete(items, selection["items"])
         note = render(items, selection["items"])
         validate(transcript, note)
         metadata.update(

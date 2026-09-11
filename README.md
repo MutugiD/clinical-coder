@@ -12,17 +12,19 @@ produces cited rules for clinical review.
 
 ## Setup
 
-Use Python 3.12 and an installed, running Ollama server. From the repository checkout:
+Use Python 3.12 and export `GEMINI_API_KEY` in your shell. The grading harness
+supplies this environment variable. The application does not load `.env` files.
+From the repository checkout:
 
 ```sh
 python3.12 -m venv .venv
 . .venv/bin/activate
 python -m pip install -r requirements.lock
 python -m pip install --no-deps --no-build-isolation -e .
-ollama pull qwen3:1.7b
+./scribe check
 ```
 
-Then run `./scribe check`. If Ollama is stopped, start it with `ollama serve`.
+Readiness checks Gemini model access; generation is verified by running extraction.
 On Windows, activate `.venv/Scripts/Activate.ps1` and use `python scribe`.
 
 ## Extract and validate
@@ -36,8 +38,8 @@ The note contains the 13 contract sections. Each element includes its value,
 timestamped evidence, and confidence; assessment also carries certainty.
 A section with no evidence contains `NOT_STATED`.
 
-The default provider is local Ollama with `qwen3:1.7b`, CPU inference, and thinking
-disabled. Provider selection is explicit; failures never silently switch providers.
+The sole live provider is Google Gemini with `gemini-3.1-flash-lite`, temperature
+zero and structured responses. Failures never silently switch execution modes.
 
 ```sh
 ./scribe check --provider gemini
@@ -51,10 +53,7 @@ fails with an explanation. Every returned note is validated.
 
 | Variable | Default |
 | --- | --- |
-| `SCRIBE_PROVIDER` | `ollama` |
-| `OLLAMA_BASE_URL` | `http://localhost:11434` |
-| `OLLAMA_MODEL` | `qwen3:1.7b` |
-| `OLLAMA_TIMEOUT_SECONDS` | `180` |
+| `SCRIBE_PROVIDER` | `gemini` |
 | `GEMINI_MODEL` | `gemini-3.1-flash-lite` |
 | `GEMINI_API_KEY` | Required for Gemini |
 | `GEMINI_TIMEOUT_SECONDS` | `180` |
@@ -111,7 +110,7 @@ Run the complete pipeline from the repository root:
 ./scribe pipeline --offline --transcript consultation.txt --register register.csv --source guideline.txt --out results/run-1
 ```
 
-Use `--provider ollama` or `--provider gemini` instead of `--offline` for live
+Use `--provider gemini` instead of `--offline` for live
 extraction. The pipeline runs extract → validate → resolve → knowledge and writes
 three JSON artifacts plus `run_log.jsonl`. A failure exits nonzero and logs later
 stages as skipped. Reusing a directory preserves prior successful files on failure;
@@ -137,8 +136,8 @@ docker run --rm clinical-scribe --version
 
 Tests and independent fixtures live in `src/tests`. Provider mocks are distinct
 from live model measurements. Use read-only input and writable output volumes for
-Docker extraction. Docker Desktop reaches host Ollama through
-`OLLAMA_BASE_URL=http://host.docker.internal:11434`.
+Docker extraction. Only the extraction service receives Gemini credentials.
+
 
 ## Architecture
 
@@ -161,7 +160,7 @@ facts. Implementation coverage and defects are tracked in GitHub Issues.
 ## Where this would break
 
 - **Unrecognised Sheng or indirect answers:** scope rules may not classify a relevant
-  utterance. Offline extraction reports unsupported turns; broader bilingual
+  utterance. Extraction reports unsupported turns; broader bilingual
   evaluation is required before deployment.
 - **Incorrect speaker labels:** a relative's account could be attributed to the
   patient. Validate attribution against the source; incorrectly labelled source
@@ -169,5 +168,5 @@ facts. Implementation coverage and defects are tracked in GitHub Issues.
 - **Ambiguous corrections and chronology:** a clinician may need to determine which
   statement is current. Preserve detected conflicts; the rules are not a general
   semantic contradiction solver.
-- **Small-model omissions or slow inference:** a grounded note may be incomplete or
+- **Provider omissions or slow inference:** a grounded note may be incomplete or
   time out. Evaluate coverage separately from validity and record CPU latency.
